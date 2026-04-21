@@ -68,11 +68,25 @@ export default function Home() {
               </ol>
             </div>
 
-            {/* Upload Zone */}
+            {/* Phase 1: Upload Zone */}
             <UploadZone
               onUploadStart={(id) => setJobId(id)}
               onUploadError={(err) => setError(err)}
             />
+
+            {/* Phase 2: Converter CTA */}
+            <div className="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Ready to convert?</h2>
+              <p className="text-gray-700 mb-4">
+                Try our interactive PL/SQL converter to transform your Oracle code to PostgreSQL in real-time.
+              </p>
+              <a
+                href="/convert"
+                className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition font-medium"
+              >
+                Open Converter →
+              </a>
+            </div>
           </div>
         )}
       </main>
