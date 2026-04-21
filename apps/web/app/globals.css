@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+}
+
+.score-low {
+  background-color: #10b981;
+}
+
+.score-medium {
+  background-color: #f59e0b;
+}
+
+.score-high {
+  background-color: #ef4444;
+}
