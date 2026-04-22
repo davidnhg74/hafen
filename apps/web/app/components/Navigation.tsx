@@ -9,6 +9,7 @@ export default function Navigation() {
   const links = [
     { href: '/', label: 'Analyzer', active: pathname === '/' },
     { href: '/convert', label: 'Converter', active: pathname === '/convert' },
+    { href: '/migration', label: 'Migration', active: pathname === '/migration' },
     { href: '/pricing', label: 'ROI Calculator', active: pathname === '/pricing' },
   ];
 
