@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     environment: str = os.getenv("ENVIRONMENT", "development")
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    max_upload_size: int = 10 * 1024 * 1024  # 10MB
+    max_upload_size: int = int(os.getenv("MAX_UPLOAD_SIZE", str(50 * 1024 * 1024)))
     frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
     # AI/LLM

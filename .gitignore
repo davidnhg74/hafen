@@ -58,3 +58,9 @@ reports/
 *.db
 *.sqlite
 postgres_data/
+
+# ANTLR generated parser (regenerate with `make grammar`)
+apps/api/src/source/oracle/_generated/
+
+# Grammar codegen jar cache
+.cache/depart-grammar/

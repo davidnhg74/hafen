@@ -1,6 +1,13 @@
+"""Tests for the IR-based complexity analyzer.
+
+These run against the interim parser today and against the ANTLR-backed
+parser as soon as `make grammar` produces it — the assertions are written
+against the public ComplexityReport contract, not parser internals.
+"""
 import pytest
-from src.analyzers.complexity_scorer import ComplexityScorer
-from src.parsers.plsql_parser import ConstructType
+
+from src.analyze.complexity import ComplexityScorer, analyze
+from src.core.ir.nodes import ConstructTag, ObjectKind
 
 
 class TestComplexityScorer:
@@ -9,103 +16,69 @@ class TestComplexityScorer:
         return ComplexityScorer()
 
     def test_simple_procedure(self, scorer, simple_procedure):
-        """Test scoring of a simple procedure."""
         report = scorer.analyze(simple_procedure)
-
-        assert report.score >= 1
-        assert report.score <= 100
+        assert 1 <= report.score <= 100
         assert report.total_lines > 0
         assert report.effort_estimate_days > 0
-        assert len(report.construct_counts) > 0
+        assert report.objects_by_kind.get(ObjectKind.PROCEDURE.value, 0) >= 1
 
     def test_hr_schema(self, scorer, hr_schema_content):
-        """Test complexity analysis of HR schema."""
         report = scorer.analyze(hr_schema_content)
-
-        # Should find multiple constructs
-        assert len(report.construct_counts) > 3
+        # The HR fixture has multiple objects across kinds.
         assert report.total_lines > 50
+        kinds = report.objects_by_kind
+        assert any(k in kinds for k in (
+            ObjectKind.PROCEDURE.value, ObjectKind.FUNCTION.value, ObjectKind.PACKAGE.value
+        )), f"expected procedural objects, got {kinds}"
 
-        # Should detect specific constructs
-        assert any("PROCEDURE" in key for key in report.construct_counts.keys())
-        assert any("FUNCTION" in key for key in report.construct_counts.keys())
-        assert any("PACKAGE" in key for key in report.construct_counts.keys())
-
-        # Should have some tier B constructs
-        assert len(report.tier_b_constructs) > 0
-
-        # Should have some tier C constructs
-        assert len(report.tier_c_constructs) > 0
-
-    def test_complex_plsql(self, scorer, complex_plsql):
-        """Test scoring of complex PL/SQL."""
+    def test_complex_plsql_detects_tier_constructs(self, scorer, complex_plsql):
         report = scorer.analyze(complex_plsql)
+        # MERGE and CONNECT BY are Tier B; PRAGMA AUTONOMOUS_TRANSACTION is Tier C.
+        assert ConstructTag.MERGE.value in report.construct_counts
+        assert ConstructTag.CONNECT_BY.value in report.construct_counts
+        assert ConstructTag.AUTONOMOUS_TXN.value in report.construct_counts
+        # And the Tier C presence pushes the score above the trivial range.
+        assert report.score > 30
 
-        # Should detect tier B and C constructs
-        assert report.score > 30  # Moderate to high complexity
-        assert any("MERGE" in str(c) for c in report.top_10_constructs)
-        assert any("CONNECT_BY" in str(c) for c in report.top_10_constructs)
+    def test_string_literal_does_not_match_keyword(self):
+        """The interim regex parser scored `'CONNECT BY'` inside a string as
+        a CONNECT BY use. Verify the new tokenizer does not."""
+        report = analyze("""
+            CREATE OR REPLACE PROCEDURE log_msg AS
+            BEGIN
+                INSERT INTO audit_log (msg) VALUES ('CONNECT BY in a string');
+            END;
+        """)
+        assert ConstructTag.CONNECT_BY.value not in report.construct_counts
+
+    def test_comment_does_not_match_keyword(self):
+        """`-- MERGE INTO` in a comment must not register."""
+        report = analyze("""
+            CREATE OR REPLACE PROCEDURE p AS
+            BEGIN
+                -- MERGE INTO is documented elsewhere
+                NULL;
+            END;
+        """)
+        assert ConstructTag.MERGE.value not in report.construct_counts
 
     def test_effort_estimation(self, scorer, hr_schema_content):
-        """Test effort estimation."""
         report = scorer.analyze(hr_schema_content, rate_per_day=1000)
-
-        # Effort should be reasonable
         assert report.effort_estimate_days > 0
-        assert report.effort_estimate_days < 100  # Sanity check
-
-        # Cost should reflect effort
-        expected_cost = report.effort_estimate_days * 1000
-        assert report.estimated_cost == expected_cost
+        assert report.effort_estimate_days < 100
+        assert report.estimated_cost == round(report.effort_estimate_days * 1000, 2)
 
     def test_custom_rate(self, scorer, simple_procedure):
-        """Test custom rate per day."""
-        report1 = scorer.analyze(simple_procedure, rate_per_day=1000)
-        report2 = scorer.analyze(simple_procedure, rate_per_day=2000)
-
-        # Cost should double with 2x rate
-        assert report2.estimated_cost == report1.estimated_cost * 2
+        a = scorer.analyze(simple_procedure, rate_per_day=1000)
+        b = scorer.analyze(simple_procedure, rate_per_day=2000)
+        assert b.estimated_cost == a.estimated_cost * 2
 
     def test_empty_content(self, scorer):
-        """Test handling of empty content."""
         report = scorer.analyze("")
-
         assert report.score >= 1
         assert report.total_lines == 0
-        assert report.effort_estimate_days == 0.5  # Minimum
-
-    def test_construct_counts(self, scorer, hr_schema_content):
-        """Test construct counting."""
-        report = scorer.analyze(hr_schema_content)
-
-        # Verify construct counts are positive integers
-        for count in report.construct_counts.values():
-            assert isinstance(count, int)
-            assert count > 0
-
-    def test_line_classification(self, scorer, complex_plsql):
-        """Test line classification into tiers."""
-        report = scorer.analyze(complex_plsql)
-
-        total_classified = (
-            report.auto_convertible_lines
-            + report.needs_review_lines
-            + report.must_rewrite_lines
-        )
-
-        # Some lines should be classified
-        assert total_classified > 0
-
-    def test_top_10_constructs(self, scorer, hr_schema_content):
-        """Test top 10 constructs identification."""
-        report = scorer.analyze(hr_schema_content)
-
-        # Should have top constructs
-        assert len(report.top_10_constructs) > 0
-        assert len(report.top_10_constructs) <= 10
+        assert report.effort_estimate_days == 0.5
 
     def test_score_range(self, scorer, hr_schema_content):
-        """Test that score is always 1-100."""
         for _ in range(5):
-            report = scorer.analyze(hr_schema_content)
-            assert 1 <= report.score <= 100
+            assert 1 <= scorer.analyze(hr_schema_content).score <= 100

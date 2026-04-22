@@ -7,10 +7,21 @@ from sqlalchemy import Column, String, Integer, DateTime, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Session
 from datetime import datetime
+from typing import Union
 import uuid
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _to_uuid(value: Union[str, uuid.UUID]) -> uuid.UUID:
+    """Coerce string UUIDs to uuid.UUID; pass uuid.UUID through unchanged.
+
+    The previous inline form `uuid.UUID(x) if isinstance(x, str) else x` was
+    parsed as `(filter_expr) if isinstance else x` inside SQLAlchemy filters,
+    silently breaking the query when callers passed uuid.UUID instances.
+    """
+    return uuid.UUID(value) if isinstance(value, str) else value
 
 
 class MigrationCheckpoint:
@@ -60,7 +71,7 @@ class CheckpointManager:
         from ..models import MigrationRecord
 
         migration = MigrationRecord(
-            id=uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id,
+            id=_to_uuid(migration_id),
             schema_name=schema_name,
             status="pending",
             started_at=None,
@@ -83,7 +94,7 @@ class CheckpointManager:
         from ..models import MigrationCheckpointRecord
 
         checkpoint = MigrationCheckpointRecord(
-            migration_id=uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id,
+            migration_id=_to_uuid(migration_id),
             table_name=table_name,
             rows_processed=rows_processed,
             total_rows=total_rows,
@@ -111,7 +122,7 @@ class CheckpointManager:
             self.db.query(MigrationCheckpointRecord)
             .filter(
                 MigrationCheckpointRecord.migration_id
-                == uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id,
+                == _to_uuid(migration_id),
                 MigrationCheckpointRecord.table_name == table_name,
             )
             .order_by(MigrationCheckpointRecord.created_at.desc())
@@ -150,7 +161,7 @@ class CheckpointManager:
         from ..models import MigrationRecord
 
         migration = self.db.query(MigrationRecord).filter(
-            MigrationRecord.id == uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id
+            MigrationRecord.id == _to_uuid(migration_id)
         ).first()
 
         if migration:
@@ -167,7 +178,7 @@ class CheckpointManager:
             self.db.query(MigrationCheckpointRecord)
             .filter(
                 MigrationCheckpointRecord.migration_id
-                == uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id
+                == _to_uuid(migration_id)
             )
             .all()
         )
@@ -203,7 +214,7 @@ class CheckpointManager:
             self.db.query(MigrationCheckpointRecord)
             .filter(
                 MigrationCheckpointRecord.migration_id
-                == uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id,
+                == _to_uuid(migration_id),
                 MigrationCheckpointRecord.status == "failed",
             )
             .all()
@@ -227,7 +238,7 @@ class CheckpointManager:
             self.db.query(MigrationCheckpointRecord)
             .filter(
                 MigrationCheckpointRecord.migration_id
-                == uuid.UUID(migration_id) if isinstance(migration_id, str) else migration_id,
+                == _to_uuid(migration_id),
                 MigrationCheckpointRecord.status == "failed",
             )
             .all()

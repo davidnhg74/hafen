@@ -43,9 +43,6 @@ def get_db_context():
         db.close()
 
 
-def create_tables():
-    Base.metadata.create_all(bind=get_engine())
-
-
-def drop_tables():
-    Base.metadata.drop_all(bind=get_engine())
+# Schema is owned by Alembic. Tests that need a fresh DB should run migrations,
+# not call Base.metadata.create_all() — keeping the two paths in sync is a known
+# trap that we choose not to inherit.

@@ -13,27 +13,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from .db import get_db, create_tables
+from .db import get_db
 from .models import Lead, AnalysisJob, JobStatus, User
 from .config import settings
-from .analyzers.complexity_scorer import ComplexityScorer
+from .analyze.complexity import ComplexityScorer
 from .reports.pdf_generator import PDFReportGenerator
-from .converters.schema_converter import SchemaConverter
-from .converters.plsql_converter import PlSqlConverter
-from .converters.oracle_functions import OracleFunctionConverter
 try:
     from .rag import ConversionCaseStore, EmbeddingGenerator
-    from .migrations import setup_rag_tables, setup_workflow_tables, setup_benchmark_tables
 except ImportError:
-    # RAG features optional for development
+    # RAG features are optional in dev (sentence-transformers is heavy).
     ConversionCaseStore = None
     EmbeddingGenerator = None
-    setup_rag_tables = lambda db: None
-    setup_workflow_tables = lambda db: None
-    setup_benchmark_tables = lambda db: None
     logger.warning("RAG features disabled - sentence_transformers not installed")
-from .migration import DataMigrator, CheckpointManager
-from .migration.tasks import get_migration_manager
+from .migration import CheckpointManager
 from .connectors import ConnectionConfig, get_connection_manager
 from .cost_calculator import CostCalculator, DatabaseSize, DeploymentType
 from .analyzers.permission_analyzer import PermissionAnalyzer, OraclePrivilegeExtractor
@@ -175,19 +167,6 @@ class ConnectionStatsResponse(BaseModel):
 # Create uploads directory
 UPLOADS_DIR = Path("/tmp/depart_uploads")
 UPLOADS_DIR.mkdir(exist_ok=True)
-
-
-@app.on_event("startup")
-def startup():
-    try:
-        create_tables()
-        # Initialize RAG system (pgvector extension + conversion_cases table)
-        db = next(get_db())
-        setup_rag_tables(db)
-        setup_workflow_tables(db)
-        setup_benchmark_tables(db)
-    except Exception as e:
-        logger.warning(f"Database initialization warning (API will run with limited functionality): {e}")
 
 
 @app.get("/health")
@@ -371,98 +350,10 @@ async def get_pdf_report(job_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid job ID format")
 
 
-# ============================================================================
-# Phase 2: Conversion Endpoints
-# ============================================================================
-
-class ConvertRequest(BaseModel):
-    code: str
-    construct_type: str  # "PROCEDURE", "FUNCTION", "TABLE", "VIEW", "SEQUENCE", "INDEX"
-
-
-class ConvertResponse(BaseModel):
-    original: str
-    converted: str
-    success: bool
-    method: str
-    warnings: list
-    errors: list
-
-
-@app.post("/api/v2/convert/plsql")
-async def convert_plsql(request: ConvertRequest):
-    """Convert PL/SQL procedure/function to PL/pgSQL."""
-    try:
-        converter = PlSqlConverter(use_llm=bool(settings.anthropic_api_key))
-
-        if request.construct_type.upper() == "FUNCTION":
-            result = converter.convert_function(request.code)
-        else:
-            result = converter.convert_procedure(request.code)
-
-        return ConvertResponse(
-            original=result.original,
-            converted=result.converted,
-            success=result.success,
-            method=result.method,
-            warnings=result.warnings,
-            errors=result.errors,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/v2/convert/schema")
-async def convert_schema_ddl(request: ConvertRequest):
-    """Convert Oracle DDL (tables, indexes, views, sequences) to PostgreSQL."""
-    try:
-        converter = SchemaConverter()
-        result = converter.convert(request.code)
-
-        return ConvertResponse(
-            original=result.original,
-            converted=result.converted,
-            success=True,
-            method="deterministic",
-            warnings=result.warnings,
-            errors=[],
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/v2/convert/batch")
-async def convert_batch(batch: list[ConvertRequest]):
-    """Convert multiple PL/SQL items in a batch (for full package conversion)."""
-    try:
-        results = []
-        plsql_converter = PlSqlConverter(use_llm=bool(settings.anthropic_api_key))
-        schema_converter = SchemaConverter()
-
-        for item in batch:
-            if item.construct_type.upper() in ["PROCEDURE", "FUNCTION"]:
-                if item.construct_type.upper() == "FUNCTION":
-                    result = plsql_converter.convert_function(item.code)
-                else:
-                    result = plsql_converter.convert_procedure(item.code)
-            else:
-                schema_result = schema_converter.convert(item.code)
-                result = schema_result
-
-            results.append(
-                ConvertResponse(
-                    original=result.original if hasattr(result, "original") else item.code,
-                    converted=result.converted,
-                    success=getattr(result, "success", True),
-                    method=getattr(result, "method", "deterministic"),
-                    warnings=getattr(result, "warnings", []),
-                    errors=getattr(result, "errors", []),
-                )
-            )
-
-        return {"results": results}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# Conversion endpoints (/api/v2/convert/*) were removed. The previous
+# regex-based converters produced unsafe output (e.g., silently dropping
+# COMMIT in PROCEDURE bodies, mis-counting BEGIN/END pairs). They will be
+# rebuilt on top of the ANTLR-parsed IR + AI-assisted lowering.
 
 
 # ============================================================================
@@ -565,35 +456,7 @@ async def get_pattern_statistics(construct_type: str, db: Session = Depends(get_
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ============================================================================
-# Database Connectivity Endpoints
-# ============================================================================
-
-@app.post("/api/v3/connections/test")
-async def test_connection(request: ConnectionConfig) -> dict:
-    """
-    Test database connection before migration.
-    Does not store credentials - purely for validation.
-    """
-    try:
-        manager = get_connection_manager()
-        result = manager.test_connection(request)
-        return result
-    except Exception as e:
-        logger.error(f"Connection test error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/v3/connections/list")
-async def list_connections() -> dict:
-    """List all active database connections."""
-    try:
-        manager = get_connection_manager()
-        connections = manager.list_connections()
-        return {"connections": connections}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+# Connection management endpoints live in their dedicated section below.
 
 # ============================================================================
 # Cost Savings Calculator
@@ -744,14 +607,6 @@ async def analyze_semantic(request: SemanticAnalysisRequest) -> SemanticAnalysis
 # Phase 3.2: Data Migration Orchestration Endpoints
 # ============================================================================
 
-class MigrationPlanRequest(BaseModel):
-    oracle_connection_string: str
-    postgres_connection_string: str
-    tables: list[str]  # List of table names to migrate
-    num_workers: int = 4
-    chunk_size: int = 10000
-
-
 class MigrationStatusResponse(BaseModel):
     migration_id: str
     status: str
@@ -763,124 +618,11 @@ class MigrationStatusResponse(BaseModel):
     errors: list[str]
 
 
-@app.post("/api/v3/migration/plan")
-async def plan_migration(request: MigrationPlanRequest):
-    """
-    Analyze schema and create optimized migration plan.
-    Uses Claude to optimize chunk sizes, parallelization, and table order.
-    """
-    try:
-        from .migration.claude_planner import MigrationPlanner
-
-        migration_id = str(uuid.uuid4())
-
-        # Check if Claude API is available
-        if settings.anthropic_api_key:
-            planner = MigrationPlanner()
-
-            # For MVP: send basic table info to Claude
-            # In production: connect to Oracle, get actual row counts/sizes
-            claude_tables = [
-                {
-                    "name": table,
-                    "rows": 1_000_000,  # Placeholder
-                    "size_gb": 1.0,  # Placeholder
-                    "has_fk": True,
-                }
-                for table in request.tables
-            ]
-
-            strategy = planner.analyze_schema(
-                tables=claude_tables,
-                available_memory_gb=8,
-                available_bandwidth_mbps=100,
-            )
-
-            plan = {
-                "migration_id": migration_id,
-                "source": "claude_optimized",
-                "tables": [
-                    {
-                        "name": table,
-                        "chunk_size": strategy.get("chunk_size", {}).get(table, request.chunk_size),
-                        "order": strategy.get("table_order", request.tables).index(table)
-                        if table in strategy.get("table_order", [])
-                        else request.tables.index(table),
-                    }
-                    for table in request.tables
-                ],
-                "num_workers": strategy.get("num_workers", 4),
-                "estimated_duration_seconds": strategy.get("estimated_duration_minutes", 60) * 60,
-                "total_tables": len(request.tables),
-                "recommendations": strategy.get("optimizations", []),
-                "risks": strategy.get("risks", []),
-            }
-        else:
-            # Fallback: basic plan without Claude
-            plan = {
-                "migration_id": migration_id,
-                "source": "default",
-                "tables": [
-                    {
-                        "name": table,
-                        "chunk_size": request.chunk_size,
-                        "order": i,
-                    }
-                    for i, table in enumerate(request.tables)
-                ],
-                "num_workers": request.num_workers,
-                "estimated_duration_seconds": 3600,
-                "total_tables": len(request.tables),
-                "recommendations": [],
-                "risks": ["Claude not available - using default strategy"],
-            }
-
-        return plan
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/v3/migration/start")
-async def start_migration(request: MigrationPlanRequest, db: Session = Depends(get_db)):
-    """
-    Start a data migration with planned strategy.
-    Runs in background, returns migration_id for polling status.
-    """
-    try:
-        migration_id = str(uuid.uuid4())
-
-        # Create migration record
-        from .models import MigrationRecord
-
-        migration = MigrationRecord(
-            id=uuid.UUID(migration_id),
-            schema_name="default",
-            status="in_progress",
-            started_at=datetime.utcnow(),
-        )
-        db.add(migration)
-        db.commit()
-
-        # Create and start background task
-        manager = get_migration_manager()
-        task = manager.create_task(
-            migration_id=migration_id,
-            oracle_connection_string=request.oracle_connection_string,
-            postgres_connection_string=request.postgres_connection_string,
-            tables=request.tables,
-            num_workers=request.num_workers,
-            chunk_size=request.chunk_size,
-        )
-
-        task.start()
-
-        return {
-            "migration_id": migration_id,
-            "status": "started",
-            "estimated_duration_seconds": 3600,
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# /api/v3/migration/plan and /api/v3/migration/start were removed. The plan
+# endpoint generated strategies from placeholder row counts; the start endpoint
+# delegated to a broken orchestrator (row-by-row INSERT, ROWNUM BETWEEN that
+# never matches, SQLAlchemy text() bound with %s placeholders). They will be
+# rebuilt on top of COPY + keyset pagination + Merkle-hash batch verification.
 
 
 @app.get("/api/v3/migration/status/{migration_id}")

@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg16
     container_name: depart_postgres
     environment:
       POSTGRES_DB: depart
@@ -13,12 +11,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./apps/api/migrations/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./apps/api/migrations/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U depart_user -d depart"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
     networks:
       - depart_network
 
@@ -28,11 +26,16 @@ services:
       dockerfile: Dockerfile
     container_name: depart_api
     environment:
-      DATABASE_URL: postgresql://depart_user:${DB_PASSWORD:-depart_secure_password}@postgres:5432/depart
+      DATABASE_URL: postgresql+psycopg://depart_user:${DB_PASSWORD:-depart_secure_password}@postgres:5432/depart
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      ENVIRONMENT: ${ENVIRONMENT:-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production-super-secret-key}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       API_HOST: 0.0.0.0
-      API_PORT: 8000
+      API_PORT: "8000"
     ports:
       - "8000:8000"
     depends_on:
@@ -40,10 +43,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
+      interval: 10s
       timeout: 3s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - depart_network
     restart: unless-stopped
@@ -56,15 +59,41 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     depends_on:
       - api
     networks:
       - depart_network
     restart: unless-stopped
 
+  # Oracle Free 23ai for integration tests / fixtures.
+  # Excluded from default `up` (multi-GB image, slow start) — opt in with:
+  #   docker compose --profile oracle up -d
+  oracle:
+    image: gvenzl/oracle-free:23-slim-faststart
+    container_name: depart_oracle
+    profiles: ["oracle"]
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-depart_oracle_pw}
+      APP_USER: hr
+      APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD:-hr_pw}
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    networks:
+      - depart_network
+
 volumes:
   postgres_data:
+    driver: local
+  oracle_data:
     driver: local
 
 networks:

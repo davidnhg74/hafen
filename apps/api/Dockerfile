@@ -1,29 +1,34 @@
-FROM python:3.14-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install system dependencies
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    postgresql-client \
-    curl \
+        curl \
+        gcc \
+        libpq5 \
+        default-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY pyproject.toml .
-RUN pip install --no-cache-dir -e .
+COPY pyproject.toml ./
+RUN pip install -e .
 
-# Copy source code
 COPY src/ ./src/
-COPY conversion-rules/ ./conversion-rules/
+COPY scripts/ ./scripts/
 COPY alembic/ ./alembic/
-COPY alembic.ini .
+COPY alembic.ini ./
+
+# Generate the ANTLR PL/SQL parser. Cached jar lives in /root/.cache; this
+# layer rebuilds only when grammar/ changes.
+RUN python3 scripts/generate_grammar.py
 
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run migrations and start the API
+# Single source of truth for schema is Alembic.
 CMD sh -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
