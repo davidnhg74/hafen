@@ -17,10 +17,23 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create enum types
-    op.execute("CREATE TYPE plan_enum AS ENUM ('trial', 'starter', 'professional', 'enterprise')")
-    op.execute("CREATE TYPE ticket_status_enum AS ENUM ('open', 'in_progress', 'resolved', 'closed')")
-    op.execute("CREATE TYPE ticket_priority_enum AS ENUM ('low', 'medium', 'high', 'critical')")
+    # Create enum types idempotently — Alembic env.py imports src.models for
+    # autogenerate, which can register these types on metadata before this
+    # migration runs (depending on SQLAlchemy version). checkfirst=True
+    # makes the CREATE TYPE a no-op if the type already exists.
+    bind = op.get_bind()
+    postgresql.ENUM(
+        "trial", "starter", "professional", "enterprise",
+        name="plan_enum",
+    ).create(bind, checkfirst=True)
+    postgresql.ENUM(
+        "open", "in_progress", "resolved", "closed",
+        name="ticket_status_enum",
+    ).create(bind, checkfirst=True)
+    postgresql.ENUM(
+        "low", "medium", "high", "critical",
+        name="ticket_priority_enum",
+    ).create(bind, checkfirst=True)
 
     # Create users table
     op.create_table(
