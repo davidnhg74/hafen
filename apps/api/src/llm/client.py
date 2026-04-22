@@ -20,6 +20,25 @@ class LLMClient:
 Convert the following Oracle PL/SQL code to PostgreSQL PL/pgSQL.
 Output ONLY the converted code, no explanations.
 
+CRITICAL CONVERSION PATTERNS:
+
+1. CONNECT BY / START WITH (hierarchical queries):
+   Oracle: SELECT ... FROM t WHERE ... START WITH condition CONNECT BY PRIOR parent_id = child_id
+   PostgreSQL: WITH RECURSIVE cte AS (
+     SELECT ... FROM t WHERE <start_with_condition>  -- anchor branch
+     UNION ALL
+     SELECT t.* FROM t JOIN cte ON <connect_by_condition>  -- recursive branch
+   ) SELECT * FROM cte;
+
+2. DECODE(expr, val1, result1, val2, result2, ..., default):
+   PostgreSQL: CASE expr WHEN val1 THEN result1 WHEN val2 THEN result2 ... ELSE default END
+
+3. NVL2(expr, if_not_null, if_null):
+   PostgreSQL: CASE WHEN expr IS NOT NULL THEN if_not_null ELSE if_null END
+
+4. MERGE INTO (upsert):
+   PostgreSQL: INSERT ... ON CONFLICT DO UPDATE SET ...
+
 Oracle PL/SQL:
 {plsql_code}
 
