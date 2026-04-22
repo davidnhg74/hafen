@@ -41,9 +41,9 @@ build/
 .DS_Store
 
 # Uploads & artifacts
-uploads/
-artifacts/
-reports/
+/uploads/
+/artifacts/
+/reports/
 *.pdf
 
 # Database
