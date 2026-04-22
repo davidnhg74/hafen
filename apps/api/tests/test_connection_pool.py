@@ -167,7 +167,10 @@ class TestConnectionPool:
             response_time_ms=10.0,
         )
         pool.stats["oracle-1"] = stats
-        pool.pools["oracle-1"].empty.return_value = False
+        # `empty()` is consulted in `while not pool.empty()`, so it must drain:
+        # False once (enter the loop), then True (exit). Returning False forever
+        # spins the loop indefinitely.
+        pool.pools["oracle-1"].empty.side_effect = [False, True]
         pool.pools["oracle-1"].get_nowait.return_value = mock_connector
 
         pool.clear_idle_connections()
@@ -178,7 +181,8 @@ class TestConnectionPool:
     def test_close_all(self, pool, mock_connector):
         """Test closing all connections."""
         pool.pools["oracle-1"] = Mock()
-        pool.pools["oracle-1"].empty.return_value = False
+        # Drain after one connector — same pattern as test_clear_idle_connections.
+        pool.pools["oracle-1"].empty.side_effect = [False, True]
         pool.pools["oracle-1"].get_nowait.return_value = mock_connector
 
         pool.close_all()

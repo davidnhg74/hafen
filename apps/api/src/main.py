@@ -296,6 +296,7 @@ async def analyze(
             return {
                 "job_id": str(job.id),
                 "status": job.status.value,
+                "complexity_report": job.complexity_report,
             }
 
         except zipfile.BadZipFile:

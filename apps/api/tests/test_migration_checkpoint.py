@@ -15,13 +15,35 @@ from src.migration.checkpoint import CheckpointManager
 
 @pytest.fixture
 def db():
-    """Create in-memory SQLite database for testing."""
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
+    """Postgres-backed test session.
+
+    Sqlite can't host this schema — `ConversionCaseRecord.embedding` is
+    `ARRAY(Float)` and several models use UUID/JSONB columns that the
+    sqlite dialect doesn't compile. We rely on the migrated dev DB
+    (`make up && alembic upgrade head`) and tear down what each test
+    inserts via a transactional rollback.
+    """
+    from src.config import settings
+    from src.models import (
+        MigrationRecord,
+        MigrationCheckpointRecord,
+    )
+
+    engine = create_engine(settings.database_url)
     Session = sessionmaker(bind=engine)
     session = Session()
-    yield session
-    session.close()
+    try:
+        yield session
+    finally:
+        # Tests insert by uuid; clean up rows they created. Using a
+        # transactional savepoint would be cleaner, but the manager-
+        # under-test commits inside its own session calls so the outer
+        # rollback wouldn't help.
+        session.rollback()
+        session.query(MigrationCheckpointRecord).delete()
+        session.query(MigrationRecord).delete()
+        session.commit()
+        session.close()
 
 
 class TestCheckpointManager:

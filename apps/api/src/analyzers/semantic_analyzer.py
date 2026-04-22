@@ -61,11 +61,19 @@ class StaticDDLExtractor:
     """Extract type mappings from Oracle and PostgreSQL DDL text."""
 
     # Matches: col_name  TYPE(p,s) [BYTE|CHAR] [constraints...]
+    # The same regex is used for both Oracle and PostgreSQL DDL — type names
+    # from both dialects are listed below. Multi-word PG types like
+    # `TIMESTAMP WITHOUT TIME ZONE` collapse to their leading token; that's
+    # acceptable since the comparator only looks at the base name + precision.
     COLUMN_RE = re.compile(
         r"""^\s*(\w+)\s+                         # column name
             (NUMBER|VARCHAR2|NVARCHAR2|DATE|CLOB|
              BLOB|RAW|LONG|CHAR|NCHAR|TIMESTAMP|
-             INTERVAL|FLOAT|BINARY_DOUBLE|BINARY_FLOAT)  # base type
+             INTERVAL|FLOAT|BINARY_DOUBLE|BINARY_FLOAT|
+             # PostgreSQL types
+             INTEGER|INT|BIGINT|SMALLINT|NUMERIC|DECIMAL|
+             REAL|DOUBLE|VARCHAR|TEXT|BOOLEAN|BYTEA|
+             UUID|JSON|JSONB|SERIAL|BIGSERIAL)     # base type
             (\s*\([^)]+\))?                        # optional (p,s)
             (?:\s+(BYTE|CHAR))?                    # optional byte/char (Oracle only)
         """,
@@ -88,16 +96,16 @@ class StaticDDLExtractor:
         """
         oracle_tables = self._parse_tables(oracle_ddl)
         pg_tables = self._parse_tables(pg_ddl)
+        # Case-insensitive index over pg_tables — both Oracle and PG identifiers
+        # fold to the same key without losing the original casing in the mapping.
+        pg_index = {k.upper(): k for k in pg_tables}
 
         mappings = []
         for table_name, oracle_cols in oracle_tables.items():
-            table_upper = table_name.upper()
-            # Try exact match first, then case-insensitive
-            pg_cols = pg_tables.get(table_upper) or pg_tables.get(
-                next((k for k in pg_tables if k.upper() == table_upper), None)
-            )
+            pg_key = pg_index.get(table_name.upper())
+            pg_cols = pg_tables.get(pg_key) if pg_key else None
 
-            if not pg_cols:
+            if pg_cols is None:
                 logger.warning(f"Table {table_name} not found in PostgreSQL DDL")
                 continue
 
@@ -121,45 +129,87 @@ class StaticDDLExtractor:
         return mappings
 
     def _parse_tables(self, ddl: str) -> Dict[str, Dict[str, str]]:
-        """Parse DDL and extract {table_name: {column_name: type}}."""
-        tables = {}
-        current_table = None
-        in_table = False
+        """Parse DDL and extract {table_name: {column_name: type}}.
 
-        for line in ddl.split("\n"):
-            # Check for CREATE TABLE
-            match = self.TABLE_RE.search(line)
-            if match:
-                current_table = match.group(1).upper()
-                tables[current_table] = {}
-                in_table = True
+        Handles both formatting styles:
+          • One column per line (multi-line CREATE TABLE).
+          • All columns on the CREATE TABLE line (single-line tests, terse DDL).
+        Strategy: locate each CREATE TABLE, find the body inside the
+        outermost parentheses, then split the body on top-level commas
+        (commas inside `NUMBER(10,2)` don't count) and feed each fragment
+        through COLUMN_RE.
+        """
+        tables: Dict[str, Dict[str, str]] = {}
+        for table_match in self.TABLE_RE.finditer(ddl):
+            # Preserve original case — the comparator looks up case-insensitively
+            # via .upper(), but mapping consumers expect to surface the actual
+            # identifier from the source (lowercase `orders`, mixed-case `Emp`).
+            table_name = table_match.group(1)
+            body = self._extract_paren_body(ddl, table_match.end())
+            if body is None:
+                tables[table_name] = {}
                 continue
-
-            # Skip if not in table context
-            if not in_table:
-                continue
-
-            # End of table definition
-            if line.strip().endswith(");") or (");)" in line and in_table):
-                in_table = False
-                continue
-
-            # Parse column line
-            col_match = self.COLUMN_RE.match(line)
-            if col_match:
+            cols: Dict[str, str] = {}
+            for fragment in self._split_top_level_commas(body):
+                fragment = fragment.strip()
+                if not fragment:
+                    continue
+                col_match = self.COLUMN_RE.match(fragment)
+                if not col_match:
+                    continue
                 col_name = col_match.group(1)
-                base_type = col_match.group(2)
-                precision = col_match.group(3) or ""
+                base_type = col_match.group(2).upper()
+                precision = (col_match.group(3) or "").replace(" ", "")
                 byte_char = col_match.group(4) or ""
-
-                # Reconstruct full type
                 full_type = base_type + precision
                 if byte_char:
-                    full_type += f" {byte_char}"
-
-                tables[current_table][col_name] = full_type
-
+                    full_type += f" {byte_char.upper()}"
+                cols[col_name] = full_type
+            tables[table_name] = cols
         return tables
+
+    @staticmethod
+    def _extract_paren_body(text: str, start: int) -> str | None:
+        """Return the text between the next `(` after `start` and its
+        matching `)`, balanced — or None if no opening paren is present."""
+        try:
+            open_idx = text.index("(", start)
+        except ValueError:
+            return None
+        depth = 0
+        for i in range(open_idx, len(text)):
+            ch = text[i]
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    return text[open_idx + 1 : i]
+        return text[open_idx + 1 :]
+
+    @staticmethod
+    def _split_top_level_commas(body: str) -> List[str]:
+        """Split on commas that aren't inside nested parens — so
+        `NUMBER(10,2)` stays intact while `id NUMBER, name VARCHAR2(50)`
+        splits cleanly."""
+        out: List[str] = []
+        depth = 0
+        buf: List[str] = []
+        for ch in body:
+            if ch == "(":
+                depth += 1
+                buf.append(ch)
+            elif ch == ")":
+                depth -= 1
+                buf.append(ch)
+            elif ch == "," and depth == 0:
+                out.append("".join(buf))
+                buf = []
+            else:
+                buf.append(ch)
+        if buf:
+            out.append("".join(buf))
+        return out
 
 
 class SemanticAnalyzer:

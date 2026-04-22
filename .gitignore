@@ -11,7 +11,11 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
+
+# Claude Code local agent state
+.claude/
 develop-eggs/
 .eggs/
 *.egg-info/

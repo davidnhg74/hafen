@@ -99,6 +99,22 @@ def generate(force: bool = False) -> int:
         text = text.replace("from PlSqlParser import", "from .PlSqlParser import")
         (OUT_DIR / base_name).write_text(text)
 
+    # The upstream antlr/grammars-v4 PL/SQL grammar embeds JavaScript-style
+    # `this.foo()` references inside semantic-predicate action blocks (e.g.
+    # `this.IsNewlineAtPos(-4)`, `this.isVersion12()`). ANTLR's Python target
+    # copies those tokens verbatim, so the generated lexer/parser raise
+    # NameError as soon as a predicate fires. Rewrite them to `self.` after
+    # codegen — this matches what the upstream Java/JS consumers see.
+    for gen_file in ("PlSqlLexer.py", "PlSqlParser.py"):
+        path = OUT_DIR / gen_file
+        if path.exists():
+            content = path.read_text()
+            # Word-boundary replace so we don't touch e.g. `this_thing`.
+            import re
+            patched = re.sub(r"\bthis\.", "self.", content)
+            if patched != content:
+                path.write_text(patched)
+
     print(f"Generated -> {OUT_DIR}", file=sys.stderr)
     return 0
 

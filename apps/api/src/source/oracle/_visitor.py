@@ -342,6 +342,44 @@ class _IRVisitor:
                 )
             )
 
+    def visit_into_clause(self, ctx) -> None:
+        # Grammar collapses `INTO` and `BULK COLLECT INTO` into the same
+        # rule (`(BULK COLLECT)? INTO ...`). Distinguish by inspecting
+        # the leading tokens — only emit BULK_COLLECT when the modifier
+        # is present, leave plain INTO unflagged.
+        text = _ctx_text(ctx).upper().lstrip()
+        if text.startswith("BULK COLLECT"):
+            self._refs.append(
+                ConstructRef(
+                    tag=ConstructTag.BULK_COLLECT,
+                    span=_span_of(ctx),
+                    snippet=_first_line(_ctx_text(ctx)),
+                )
+            )
+
+    def visit_outer_join_sign(self, ctx) -> None:
+        # Oracle's `(+)` operator. Grammar gives it a dedicated rule
+        # `outer_join_sign : '(' '+' ')'`, so any visit here is a hit.
+        self._refs.append(
+            ConstructRef(
+                tag=ConstructTag.OUTER_JOIN_PLUS,
+                span=_span_of(ctx),
+                snippet="(+)",
+            )
+        )
+
+    def visit_ref_cursor_type_def(self, ctx) -> None:
+        # `TYPE x IS REF CURSOR [RETURN ...]`. The grammar exposes this
+        # as a discrete rule under `type_definition`, so a visit confirms
+        # the construct without text inspection.
+        self._refs.append(
+            ConstructRef(
+                tag=ConstructTag.REF_CURSOR,
+                span=_span_of(ctx),
+                snippet=_first_line(_ctx_text(ctx)),
+            )
+        )
+
 
 # ─── Dispatcher: bridges ANTLR's CamelCase methods to our snake_case ─────────
 
@@ -359,6 +397,7 @@ def _build_dispatcher(target: _IRVisitor):
     rule_to_method = {
         "Create_table": "visit_create_table",
         "Create_view": "visit_create_view",
+        "Create_materialized_view": "visit_create_view",
         "Create_index": "visit_create_index",
         "Create_sequence": "visit_create_sequence",
         "Create_trigger": "visit_create_trigger",
@@ -371,6 +410,9 @@ def _build_dispatcher(target: _IRVisitor):
         "Forall_statement": "visit_forall_statement",
         "Execute_immediate": "visit_execute_immediate",
         "Pragma_declaration": "visit_pragma_declaration",
+        "Into_clause": "visit_into_clause",
+        "Outer_join_sign": "visit_outer_join_sign",
+        "Ref_cursor_type_def": "visit_ref_cursor_type_def",
     }
     for rule, method_name in rule_to_method.items():
         target_method = getattr(target, method_name)

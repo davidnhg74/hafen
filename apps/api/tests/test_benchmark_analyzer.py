@@ -137,13 +137,16 @@ class TestBenchmarkCapture:
         assert metrics.migration_id == "test-123"
 
     def test_capture_without_connection(self, mock_oracle_connector):
-        """Test graceful handling when connection fails."""
+        """When inner queries fail we degrade to an empty baseline rather than
+        raising — the caller still gets a valid OracleBaseline they can compare
+        against later, just with no queries/tables captured."""
         mock_session = mock_oracle_connector.get_session.return_value
         mock_session.execute.side_effect = Exception("Connection failed")
 
-        # Should raise or handle gracefully
-        with pytest.raises(Exception):
-            BenchmarkCapture.capture_oracle_baseline(mock_oracle_connector)
+        baseline = BenchmarkCapture.capture_oracle_baseline(mock_oracle_connector)
+
+        assert baseline.top_queries == []
+        assert baseline.table_stats == []
 
 
 class TestBenchmarkComparator:

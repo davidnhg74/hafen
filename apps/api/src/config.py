@@ -6,9 +6,12 @@ import os
 class Settings(BaseSettings):
     model_config = ConfigDict(env_file=".env", extra="allow")
 
-    # Database
+    # Database — must specify the +psycopg driver explicitly. Bare "postgresql://"
+    # makes SQLAlchemy reach for psycopg2, which we don't ship; psycopg (v3) is
+    # in the dependency set.
     database_url: str = os.getenv(
-        "DATABASE_URL", "postgresql://depart:depart_dev_pw@localhost:5432/depart_dev"
+        "DATABASE_URL",
+        "postgresql+psycopg://depart_user:depart_secure_password@localhost:5432/depart",
     )
 
     # Environment

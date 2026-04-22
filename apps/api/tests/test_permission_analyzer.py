@@ -33,51 +33,40 @@ class TestOraclePrivilegeExtractor:
         return OraclePrivilegeExtractor()
 
     def test_extract_dba_privileges(self, extractor, mock_connector):
-        """Test extraction with DBA access."""
+        """Test extraction with DBA access. Use plain dicts as the row mock —
+        the analyzer calls `dict(row)` and `row["key"]`, which Mock objects
+        don't satisfy without custom `keys()` plumbing."""
         mock_session = Mock()
         mock_connector.get_session.return_value = mock_session
 
-        # Mock DBA privilege queries
         sys_privs_result = Mock()
         sys_privs_result.mappings.return_value.all.return_value = [
-            Mock(
-                items=lambda: [
-                    ("grantee", "SCOTT"),
-                    ("privilege", "CREATE TABLE"),
-                    ("admin_option", "YES"),
-                ]
-            )
+            {"grantee": "SCOTT", "privilege": "CREATE TABLE", "admin_option": "YES"}
         ]
 
         obj_privs_result = Mock()
         obj_privs_result.mappings.return_value.all.return_value = [
-            Mock(
-                items=lambda: [
-                    ("grantee", "SCOTT"),
-                    ("owner", "SYS"),
-                    ("table_name", "V$SQL"),
-                    ("privilege", "SELECT"),
-                    ("grantable", "NO"),
-                ]
-            )
+            {
+                "grantee": "SCOTT",
+                "owner": "SYS",
+                "table_name": "V$SQL",
+                "privilege": "SELECT",
+                "grantable": "NO",
+            }
         ]
 
         role_privs_result = Mock()
         role_privs_result.mappings.return_value.all.return_value = [
-            Mock(
-                items=lambda: [
-                    ("grantee", "SCOTT"),
-                    ("granted_role", "DBA"),
-                    ("admin_option", "NO"),
-                    ("default_role", "YES"),
-                ]
-            )
+            {
+                "grantee": "SCOTT",
+                "granted_role": "DBA",
+                "admin_option": "NO",
+                "default_role": "YES",
+            }
         ]
 
         dba_users_result = Mock()
-        dba_users_result.mappings.return_value.all.return_value = [
-            Mock(items=lambda: [("username", "SYS")])
-        ]
+        dba_users_result.mappings.return_value.all.return_value = [{"username": "SYS"}]
 
         mock_session.execute.side_effect = [
             sys_privs_result,

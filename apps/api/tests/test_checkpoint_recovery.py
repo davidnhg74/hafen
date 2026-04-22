@@ -73,7 +73,7 @@ class TestCheckpointManager:
         mock_db.add = Mock()
         mock_db.commit = Mock()
 
-        result = manager.create_migration(migration_id, "public")
+        result = manager.create_migration("public", migration_id=migration_id)
 
         assert result == migration_id
         assert mock_db.add.called

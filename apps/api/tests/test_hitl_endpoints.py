@@ -40,15 +40,32 @@ class TestWorkflowEndpoints:
         assert data["status"] == "running"
 
     def test_create_workflow_with_migration_id(self, client):
-        """Test creating workflow with migration reference."""
-        migration_id = str(uuid.uuid4())
-        response = client.post(
-            "/api/v3/workflow/create", json={"name": "Test", "migration_id": migration_id}
-        )
+        """Test creating workflow with migration reference. The endpoint
+        enforces an FK to migrations.id, so the test inserts a migration
+        row first instead of fabricating a random UUID."""
+        from src.db import get_db_context
+        from src.models import MigrationRecord
 
-        assert response.status_code == 200
-        data = response.json()
-        assert data["migration_id"] == migration_id
+        with get_db_context() as session:
+            migration = MigrationRecord(schema_name="hitl-test-schema", status="pending")
+            session.add(migration)
+            session.commit()
+            migration_id = str(migration.id)
+
+        try:
+            response = client.post(
+                "/api/v3/workflow/create",
+                json={"name": "Test", "migration_id": migration_id},
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["migration_id"] == migration_id
+        finally:
+            with get_db_context() as session:
+                session.query(MigrationRecord).filter(
+                    MigrationRecord.id == uuid.UUID(migration_id)
+                ).delete()
+                session.commit()
 
     def test_get_workflow(self, client):
         """Test retrieving workflow details."""

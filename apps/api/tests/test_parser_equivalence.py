@@ -49,6 +49,60 @@ CORPUS = [
         """,
         id="proc-with-connect-by",
     ),
+    pytest.param(
+        """
+        CREATE OR REPLACE PROCEDURE bulk_load AS
+            TYPE id_tab IS TABLE OF NUMBER;
+            ids id_tab;
+        BEGIN
+            SELECT id BULK COLLECT INTO ids FROM emp;
+            FORALL i IN 1 .. ids.COUNT
+                UPDATE emp SET status = 'X' WHERE id = ids(i);
+        END;
+        """,
+        id="proc-with-bulk-collect-and-forall",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE PROCEDURE dyn AS
+        BEGIN
+            EXECUTE IMMEDIATE 'TRUNCATE TABLE t';
+        END;
+        """,
+        id="proc-with-execute-immediate",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE PROCEDURE auto AS
+            PRAGMA AUTONOMOUS_TRANSACTION;
+        BEGIN
+            INSERT INTO audit_log VALUES (SYSDATE);
+            COMMIT;
+        END;
+        """,
+        id="proc-with-autonomous-transaction",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE VIEW emp_dept AS
+        SELECT e.id, d.name
+        FROM emp e, dept d
+        WHERE e.dept_id = d.id(+);
+        """,
+        id="view-with-outer-join-plus",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE PACKAGE BODY emp_pkg AS
+            TYPE emp_cur IS REF CURSOR;
+            PROCEDURE list_emps(c OUT emp_cur) IS
+            BEGIN
+                OPEN c FOR SELECT id FROM emp;
+            END;
+        END;
+        """,
+        id="package-with-ref-cursor-type",
+    ),
 ]
 
 

@@ -67,17 +67,21 @@ class CheckpointManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_migration(self, migration_id: str, schema_name: str) -> str:
-        """Create a new migration record."""
+    def create_migration(self, schema_name: str, migration_id: str | None = None) -> str:
+        """Create a new migration record. If `migration_id` is omitted, the DB
+        default (uuid4) is used — callers that need a deterministic id can
+        still pass one explicitly."""
         from ..models import MigrationRecord
 
-        migration = MigrationRecord(
-            id=_to_uuid(migration_id),
-            schema_name=schema_name,
-            status="pending",
-            started_at=None,
-            completed_at=None,
-        )
+        kwargs = {
+            "schema_name": schema_name,
+            "status": "pending",
+            "started_at": None,
+            "completed_at": None,
+        }
+        if migration_id is not None:
+            kwargs["id"] = _to_uuid(migration_id)
+        migration = MigrationRecord(**kwargs)
         self.db.add(migration)
         self.db.commit()
         return str(migration.id)

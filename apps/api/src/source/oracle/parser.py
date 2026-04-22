@@ -53,8 +53,13 @@ def parse(source: str, *, name: str = "<inline>") -> Module:
       1. ANTLR-backed parser (`_visitor.parse_with_antlr`) when the
          generated package exists. This is the production path; CI and
          the Docker build always satisfy it.
-      2. Interim string/comment-aware parser. Local-dev fallback so
-         contributors aren't blocked before running `make grammar`.
+      2. Interim string/comment-aware parser. Used both as a local-dev
+         fallback (before `make grammar`) AND as a safety net when ANTLR
+         throws on inputs the grammar's Python runtime can't handle —
+         some vendored PL/SQL rules trip an assertion inside
+         `CommonTokenStream.adjustSeekIndex` on short inputs. Rather
+         than die on the user, we downgrade to the interim parser and
+         tag a module-level diagnostic so downstream consumers know.
 
     The two paths produce the same `Module` shape — see
     `tests/test_parser_equivalence.py` for the gating test.
@@ -62,8 +67,98 @@ def parse(source: str, *, name: str = "<inline>") -> Module:
     from . import _visitor
 
     if _visitor.is_available():
-        return _visitor.parse_with_antlr(source, name=name)
+        try:
+            module = _visitor.parse_with_antlr(source, name=name)
+            if _looks_like_silent_miss(module, source):
+                # ANTLR ran but didn't recognize the top-level rule (e.g.
+                # vendored grammar gaps). Re-parse with the interim path
+                # so the IR isn't empty for downstream callers.
+                fallback = _InterimParser(source, name).parse()
+                _attach_fallback_diag(
+                    fallback, RuntimeError("ANTLR returned no objects for non-empty source")
+                )
+                return fallback
+            # ANTLR is excellent at object structure (where TABLE/PROCEDURE/...
+            # start and end) but only knows the constructs we've taught its
+            # visitor about. The interim parser's token scanner sweeps the
+            # long tail (DBMS_*, dblinks, %TYPE pseudo-attributes, RAISE_-
+            # APPLICATION_ERROR, etc.) — much cheaper to keep that as a
+            # second pass than to add a visitor method for every Oracle
+            # keyword. Merge the construct refs into ANTLR's module.
+            _augment_with_interim_constructs(module, source)
+            return module
+        except Exception as exc:  # noqa: BLE001 — grammar bugs vary widely
+            module = _InterimParser(source, name).parse()
+            _attach_fallback_diag(module, exc)
+            return module
     return _InterimParser(source, name).parse()
+
+
+def _augment_with_interim_constructs(module: Module, source: str) -> None:
+    """Run the interim parser purely for its construct-detection pass and
+    union those tags onto the ANTLR-produced module. We dedupe by
+    (tag, span.start_line, span.start_col) so re-runs are idempotent."""
+    interim = _InterimParser(source, "<augment>").parse()
+    interim_refs: List[ConstructRef] = []
+    for obj in interim.objects:
+        interim_refs.extend(getattr(obj, "referenced_constructs", []))
+    if not interim_refs:
+        return
+    sentinel = next(
+        (o for o in module.objects if o.name == "<module-constructs>"), None
+    )
+    if sentinel is None:
+        sentinel = Subprogram(
+            kind=ObjectKind.UNKNOWN,
+            name="<module-constructs>",
+            span=module.span,
+            line_count=0,
+        )
+        module.objects.append(sentinel)
+    seen = {
+        (r.tag, r.span.start_line, r.span.start_col)
+        for r in sentinel.referenced_constructs
+    }
+    for r in interim_refs:
+        key = (r.tag, r.span.start_line, r.span.start_col)
+        if key in seen:
+            continue
+        sentinel.referenced_constructs.append(r)
+        seen.add(key)
+
+
+def _looks_like_silent_miss(module: Module, source: str) -> bool:
+    """True when ANTLR produced no schema objects but the source clearly
+    declares one. We only check for `CREATE` because everything else
+    (anonymous PL/SQL blocks, statement-level scripts) legitimately yields
+    empty Module shapes."""
+    has_real_object = any(o.name != "<module-constructs>" for o in module.objects)
+    if has_real_object:
+        return False
+    # Cheap upper-case scan; a substring match is good enough — false
+    # positives just mean we re-run the interim parser unnecessarily.
+    return "CREATE " in source.upper()
+
+
+def _attach_fallback_diag(module: Module, exc: Exception) -> None:
+    diag = Diagnostic(
+        code="ORA.PARSE.ANTLR_FALLBACK",
+        severity=Severity.WARNING,
+        message=f"ANTLR parse failed ({type(exc).__name__}: {exc}); using interim parser",
+        span=module.span,
+    )
+    # Re-use the sentinel if the interim parser emitted one; otherwise create one.
+    if module.objects and module.objects[-1].name == "<module-constructs>":
+        module.objects[-1].diagnostics.append(diag)
+        return
+    sentinel = Subprogram(
+        kind=ObjectKind.UNKNOWN,
+        name="<module-constructs>",
+        span=module.span,
+        line_count=0,
+    )
+    sentinel.diagnostics.append(diag)
+    module.objects.append(sentinel)
 
 
 def parse_with_interim(source: str, *, name: str = "<inline>") -> Module:
@@ -262,6 +357,43 @@ class _InterimParser:
             if t.kind == TokenKind.PERCENT_ATTR and t.upper in ("%TYPE", "%ROWTYPE"):
                 yield ConstructRef(ConstructTag.PERCENT_TYPE, _span_of(t), t.upper)
                 i += 1
+                continue
+
+            # Oracle OUTER JOIN (+) operator — three consecutive tokens `(`, `+`, `)`.
+            # The lexer leaves `+` as a PUNCT/operator token, so we match by text.
+            if (
+                t.kind == TokenKind.PUNCT
+                and t.text == "("
+                and i + 2 < n
+                and tokens[i + 1].text == "+"
+                and tokens[i + 2].kind == TokenKind.PUNCT
+                and tokens[i + 2].text == ")"
+            ):
+                yield ConstructRef(
+                    ConstructTag.OUTER_JOIN_PLUS,
+                    _span_between(t, tokens[i + 2]),
+                    "(+)",
+                )
+                i += 3
+                continue
+
+            # REF CURSOR — either `SYS_REFCURSOR` (single ident) or
+            # `IS REF CURSOR` / `TYPE x IS REF CURSOR` (three consecutive keywords).
+            if t.kind == TokenKind.IDENT and t.upper == "SYS_REFCURSOR":
+                yield ConstructRef(ConstructTag.REF_CURSOR, _span_of(t), "SYS_REFCURSOR")
+                i += 1
+                continue
+            if (
+                t.is_kw("REF")
+                and i + 1 < n
+                and tokens[i + 1].is_kw("CURSOR")
+            ):
+                yield ConstructRef(
+                    ConstructTag.REF_CURSOR,
+                    _span_between(t, tokens[i + 1]),
+                    "REF CURSOR",
+                )
+                i += 2
                 continue
 
             # ROWNUM / ROWID / LEVEL pseudocolumns
