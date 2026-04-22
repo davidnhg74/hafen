@@ -9,6 +9,9 @@ export interface User {
   plan: 'trial' | 'starter' | 'professional' | 'enterprise';
   email_verified: boolean;
   created_at: string;
+  databases_used?: number;
+  migrations_used_this_month?: number;
+  llm_conversions_this_month?: number;
 }
 
 interface AuthStore {

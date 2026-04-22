@@ -11,26 +11,13 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    // Wait for store to hydrate from localStorage
-    const unsubscribe = useAuthStore.subscribe(
-      (state) => state.user,
-      () => {
-        // Check auth after state is available
-        if (!isAuthenticated) {
-          router.push(`/login?next=${encodeURIComponent(pathname)}`);
-        }
-      }
-    );
-
-    // Initial check
+    // Check auth on mount
     if (!isAuthenticated) {
       router.push(`/login?next=${encodeURIComponent(pathname)}`);
     }
-
-    return () => unsubscribe();
   }, [isAuthenticated, pathname, router]);
 
   if (!isAuthenticated) {

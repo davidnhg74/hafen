@@ -57,6 +57,8 @@ export default function ReportPreview({ jobId, onBack }: ReportPreviewProps) {
 
       return () => clearTimeout(timer);
     }
+
+    return undefined;
   }, [jobId, isLoading, pollCount]);
 
   if (isLoading || !job) {

@@ -8,18 +8,13 @@ import { PLAN_LIMITS } from '@/app/lib/planLimits';
 
 function BillingContent() {
   const { user } = useAuthStore();
-  const [plans, setPlans] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [plansRes, invoicesRes] = await Promise.all([
-          api.get('/api/v4/billing/plans'),
-          api.get('/api/v4/billing/invoices'),
-        ]);
-        setPlans(plansRes.data.plans || []);
+        const invoicesRes = await api.get('/api/v4/billing/invoices');
         setInvoices(invoicesRes.data.invoices || []);
       } catch (err) {
         console.error('Failed to load billing data');

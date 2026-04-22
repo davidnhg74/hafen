@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import AuthGuard from './components/AuthGuard';
-import UploadZone from './components/UploadZone';
-import ReportPreview from './components/ReportPreview';
+import AuthGuard from '@/app/components/AuthGuard';
+import UploadZone from '@/app/components/UploadZone';
+import ReportPreview from '@/app/components/ReportPreview';
 
 function HomeContent() {
   const [jobId, setJobId] = useState<string | null>(null);

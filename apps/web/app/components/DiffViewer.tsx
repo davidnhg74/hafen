@@ -83,7 +83,7 @@ export default function DiffViewer({
             height="100%"
             original={originalCode}
             modified={convertedCode}
-            language="sql"
+            language={language}
             theme="light"
             options={{
               ...editorOptions,
