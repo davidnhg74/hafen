@@ -12,12 +12,19 @@ export default function Navigation() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
 
-  const links = [
-    { href: '/', label: 'Analyzer', active: pathname === '/' },
-    { href: '/convert', label: 'Converter', active: pathname === '/convert' },
-    { href: '/migration', label: 'Migration', active: pathname === '/migration' },
-    { href: '/pricing', label: 'ROI Calculator', active: pathname === '/pricing' },
+  const publicLinks = [
+    { href: '/features', label: 'Features', active: pathname === '/features' },
+    { href: '/pricing', label: 'Pricing', active: pathname === '/pricing' },
+    { href: '/contact', label: 'Contact', active: pathname === '/contact' },
   ];
+
+  const appLinks = [
+    { href: '/analyzer', label: 'Analyzer', active: pathname === '/analyzer' },
+    { href: '/converter', label: 'Converter', active: pathname === '/converter' },
+    { href: '/migration', label: 'Migration', active: pathname === '/migration' },
+  ];
+
+  const links = isAuthenticated ? appLinks : publicLinks;
 
   const handleLogout = async () => {
     await logout();
