@@ -22,6 +22,7 @@ from .rag import ConversionCaseStore, EmbeddingGenerator
 from .migrations import setup_rag_tables
 from .migration import DataMigrator, CheckpointManager
 from .migration.tasks import get_migration_manager
+from .connectors import ConnectionConfig, get_connection_manager
 
 app = FastAPI(title="Depart API", version="0.2.0")
 
@@ -405,6 +406,36 @@ async def get_pattern_statistics(construct_type: str, db: Session = Depends(get_
         store = ConversionCaseStore(db)
         stats = store.get_pattern_stats(construct_type)
         return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Database Connectivity Endpoints
+# ============================================================================
+
+@app.post("/api/v3/connections/test")
+async def test_connection(request: ConnectionConfig) -> dict:
+    """
+    Test database connection before migration.
+    Does not store credentials - purely for validation.
+    """
+    try:
+        manager = get_connection_manager()
+        result = manager.test_connection(request)
+        return result
+    except Exception as e:
+        logger.error(f"Connection test error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v3/connections/list")
+async def list_connections() -> dict:
+    """List all active database connections."""
+    try:
+        manager = get_connection_manager()
+        connections = manager.list_connections()
+        return {"connections": connections}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
