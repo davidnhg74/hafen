@@ -59,3 +59,52 @@ class ConversionCaseRecord(Base):
     def success_rate(self) -> float:
         total = self.success_count + self.fail_count
         return self.success_count / total if total > 0 else 0.0
+
+
+class MigrationRecord(Base):
+    """Track data migrations from Oracle to PostgreSQL."""
+
+    __tablename__ = "migrations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    schema_name = Column(String(255), nullable=False)
+    status = Column(String(50), nullable=False, index=True)  # pending, in_progress, completed, failed
+    total_rows = Column(Integer, default=0)
+    rows_transferred = Column(Integer, default=0)
+    total_bytes = Column(Integer, default=0)
+    estimated_duration_seconds = Column(Integer)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    @property
+    def elapsed_seconds(self) -> int:
+        if not self.started_at:
+            return 0
+        end = self.completed_at or datetime.utcnow()
+        return int((end - self.started_at).total_seconds())
+
+    @property
+    def progress_percentage(self) -> float:
+        if self.total_rows == 0:
+            return 0.0
+        return (self.rows_transferred / self.total_rows) * 100
+
+
+class MigrationCheckpointRecord(Base):
+    """Store checkpoints for resumable migrations."""
+
+    __tablename__ = "migration_checkpoints"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    migration_id = Column(UUID(as_uuid=True), ForeignKey("migrations.id"), nullable=False, index=True)
+    table_name = Column(String(255), nullable=False)
+    rows_processed = Column(Integer, default=0)
+    total_rows = Column(Integer, default=0)
+    progress_percentage = Column(Float, default=0.0)
+    last_rowid = Column(String(255), nullable=True)
+    status = Column(String(50), nullable=False)  # in_progress, completed, failed
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
