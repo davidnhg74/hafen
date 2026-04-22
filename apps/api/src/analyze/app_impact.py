@@ -444,8 +444,10 @@ def _exts_for_languages(langs: Sequence[str]) -> Set[str]:
 
 
 _LANG_TO_EXTS = {
-    "java":   {".java"},
-    "python": {".py"},
-    "sql":    {".sql"},
+    "java":    {".java"},
+    "python":  {".py"},
+    "sql":     {".sql"},
+    "csharp":  {".cs"},
+    "mybatis": {".xml"},
 }
 EXTRACTORS_BY_LANG_EXTS: Set[str] = set().union(*_LANG_TO_EXTS.values())

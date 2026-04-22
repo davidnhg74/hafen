@@ -5,7 +5,7 @@ Tests DDL extraction, static analysis, and Claude integration.
 
 import pytest
 from unittest.mock import MagicMock, patch
-from apps.api.src.analyzers.semantic_analyzer import (
+from src.analyzers.semantic_analyzer import (
     StaticDDLExtractor,
     SemanticAnalyzer,
     SemanticIssue,
@@ -358,8 +358,8 @@ class TestSemanticAnalyzerIntegration:
     def test_real_semantic_analysis_with_claude(self):
         """Full semantic analysis with actual Claude API (if available)."""
         try:
-            from apps.api.src.llm.client import LLMClient
-            from apps.api.src.config import settings
+            from src.llm.client import LLMClient
+            from src.config import settings
 
             if not settings.anthropic_api_key:
                 pytest.skip("No Anthropic API key configured")
