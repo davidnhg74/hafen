@@ -21,7 +21,9 @@ jobs:
       - name: Install dev tooling
         run: |
           python -m pip install --upgrade pip
-          pip install ruff black mypy
+          # Pin to versions that match dev tooling. Bump in lockstep when
+          # we want to adopt a newer black formatting style.
+          pip install 'ruff>=0.1.8' 'black==25.11.0' 'mypy>=1.7.1'
       - name: ruff
         run: ruff check apps/api/src apps/api/tests
       - name: black --check
@@ -68,9 +70,23 @@ jobs:
       - name: Verify ANTLR path activated
         working-directory: apps/api
         # `python -c` does not auto-add CWD to sys.path; PYTHONPATH=. fixes that.
+        # Print _generated/ contents on failure so the next debugger sees it.
         run: |
-          PYTHONPATH=. python3 -c "from src.source.oracle import _visitor; \
-            assert _visitor.is_available(), 'ANTLR _generated/ not importable after make grammar'"
+          ls -la src/source/oracle/_generated/ || true
+          PYTHONPATH=. python3 -c "
+          import importlib, traceback
+          for m in ('src.source.oracle._generated.PlSqlLexer',
+                   'src.source.oracle._generated.PlSqlParser',
+                   'src.source.oracle._generated.PlSqlParserVisitor'):
+              try:
+                  importlib.import_module(m)
+                  print(f'OK   {m}')
+              except Exception as e:
+                  print(f'FAIL {m}: {type(e).__name__}: {e}')
+                  traceback.print_exc()
+          from src.source.oracle import _visitor
+          assert _visitor.is_available(), 'ANTLR _generated/ not importable after make grammar'
+          "
       - name: Bootstrap extensions
         run: |
           PGPASSWORD=depart_secure_password psql -h localhost -U depart_user -d depart \
