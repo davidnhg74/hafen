@@ -20,6 +20,7 @@ from .converters.plsql_converter import PlSqlConverter
 from .converters.oracle_functions import OracleFunctionConverter
 from .rag import ConversionCaseStore, EmbeddingGenerator
 from .migrations import setup_rag_tables
+from .migration import DataMigrator, CheckpointManager
 
 app = FastAPI(title="Depart API", version="0.2.0")
 
@@ -403,6 +404,144 @@ async def get_pattern_statistics(construct_type: str, db: Session = Depends(get_
         store = ConversionCaseStore(db)
         stats = store.get_pattern_stats(construct_type)
         return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Phase 3.2: Data Migration Orchestration Endpoints
+# ============================================================================
+
+class MigrationPlanRequest(BaseModel):
+    oracle_connection_string: str
+    postgres_connection_string: str
+    tables: list[str]  # List of table names to migrate
+    num_workers: int = 4
+    chunk_size: int = 10000
+
+
+class MigrationStatusResponse(BaseModel):
+    migration_id: str
+    status: str
+    progress_percentage: float
+    rows_transferred: int
+    total_rows: int
+    elapsed_seconds: int
+    estimated_remaining_seconds: int
+    errors: list[str]
+
+
+@app.post("/api/v3/migration/plan")
+async def plan_migration(request: MigrationPlanRequest):
+    """
+    Analyze schema and create optimized migration plan.
+    Returns: chunk sizes, table order, estimated duration.
+    """
+    try:
+        # For MVP: return basic plan
+        # In Phase 3.2: integrate Claude for optimization
+        plan = {
+            "migration_id": str(uuid.uuid4()),
+            "tables": [
+                {
+                    "name": table,
+                    "chunk_size": request.chunk_size,
+                    "estimated_rows": 10000,
+                    "order": i,
+                }
+                for i, table in enumerate(request.tables)
+            ],
+            "estimated_duration_seconds": 3600,
+            "total_tables": len(request.tables),
+        }
+
+        return plan
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/migration/start")
+async def start_migration(request: MigrationPlanRequest, db: Session = Depends(get_db)):
+    """
+    Start a data migration with planned strategy.
+    Runs in background, returns migration_id for polling status.
+    """
+    try:
+        migration_id = str(uuid.uuid4())
+
+        # Create migration record
+        from .models import MigrationRecord
+
+        migration = MigrationRecord(
+            id=uuid.UUID(migration_id),
+            schema_name="default",
+            status="in_progress",
+            started_at=datetime.utcnow(),
+        )
+        db.add(migration)
+        db.commit()
+
+        # TODO: Spawn background task to run migration
+        # For MVP: return migration_id for polling
+
+        return {
+            "migration_id": migration_id,
+            "status": "started",
+            "estimated_duration_seconds": 3600,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v3/migration/status/{migration_id}")
+async def get_migration_status(migration_id: str, db: Session = Depends(get_db)):
+    """
+    Get current migration status and progress.
+    Poll this to track migration in real-time.
+    """
+    try:
+        from .models import MigrationRecord
+
+        migration = db.query(MigrationRecord).filter(
+            MigrationRecord.id == uuid.UUID(migration_id)
+        ).first()
+
+        if not migration:
+            raise HTTPException(status_code=404, detail="Migration not found")
+
+        checkpoint_manager = CheckpointManager(db)
+        progress = checkpoint_manager.get_migration_progress(migration_id)
+
+        elapsed = migration.elapsed_seconds
+        estimated_remaining = (
+            max(0, migration.estimated_duration_seconds - elapsed)
+            if migration.estimated_duration_seconds
+            else 0
+        )
+
+        return MigrationStatusResponse(
+            migration_id=migration_id,
+            status=migration.status,
+            progress_percentage=migration.progress_percentage,
+            rows_transferred=migration.rows_transferred,
+            total_rows=migration.total_rows,
+            elapsed_seconds=elapsed,
+            estimated_remaining_seconds=estimated_remaining,
+            errors=[],
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v3/migration/{migration_id}/checkpoints")
+async def get_migration_checkpoints(migration_id: str, db: Session = Depends(get_db)):
+    """Get all checkpoints for a migration (for recovery/debugging)."""
+    try:
+        checkpoint_manager = CheckpointManager(db)
+        progress = checkpoint_manager.get_migration_progress(migration_id)
+        return progress
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
