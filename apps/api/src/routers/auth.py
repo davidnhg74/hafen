@@ -65,44 +65,55 @@ class VerifyEmailRequest(BaseModel):
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def signup(request: SignupRequest, db: Session = Depends(get_db)):
     """Create a new user account and send verification email."""
-    # Check if user already exists
-    existing = db.query(User).filter(User.email == request.email).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
+    try:
+        # Check if user already exists
+        existing = db.query(User).filter(User.email == request.email).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered",
+            )
+
+        # Create user
+        user = User(
+            id=uuid.uuid4(),
+            email=request.email,
+            full_name=request.full_name,
+            hashed_password=hash_password(request.password),
+            plan=PlanEnum.TRIAL,
+            trial_starts_at=datetime.utcnow(),
+            trial_expires_at=datetime.utcnow() + timedelta(days=14),
+            usage_reset_at=datetime.utcnow(),
         )
 
-    # Create user
-    user = User(
-        id=uuid.uuid4(),
-        email=request.email,
-        full_name=request.full_name,
-        hashed_password=hash_password(request.password),
-        plan=PlanEnum.TRIAL,
-        trial_starts_at=datetime.utcnow(),
-        trial_expires_at=datetime.utcnow() + timedelta(days=14),
-        usage_reset_at=datetime.utcnow(),
-    )
+        # Generate email verification token
+        user.email_verify_token = secrets.token_urlsafe(32)
 
-    # Generate email verification token
-    user.email_verify_token = secrets.token_urlsafe(32)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+        # Send verification email
+        send_verification_email(user.email, user.email_verify_token, settings.frontend_url)
 
-    # Send verification email
-    send_verification_email(user.email, user.email_verify_token, settings.frontend_url)
+        # Return tokens
+        access_token = create_access_token({"sub": str(user.id)})
+        refresh_token = create_refresh_token({"sub": str(user.id)})
 
-    # Return tokens
-    access_token = create_access_token({"sub": str(user.id)})
-    refresh_token = create_refresh_token({"sub": str(user.id)})
-
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-    )
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Signup error: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Signup failed: {str(e)}"
+        )
 
 
 @router.post("/login", response_model=TokenResponse)
