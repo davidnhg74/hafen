@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "./components/Navigation";
+import AuthInitializer from "./components/AuthInitializer";
 
 export const metadata: Metadata = {
   title: "Depart — Oracle to PostgreSQL Migration",
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <AuthInitializer />
         <Navigation />
         <div className="min-h-screen">
           {children}
