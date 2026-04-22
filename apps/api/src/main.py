@@ -436,25 +436,73 @@ class MigrationStatusResponse(BaseModel):
 async def plan_migration(request: MigrationPlanRequest):
     """
     Analyze schema and create optimized migration plan.
-    Returns: chunk sizes, table order, estimated duration.
+    Uses Claude to optimize chunk sizes, parallelization, and table order.
     """
     try:
-        # For MVP: return basic plan
-        # In Phase 3.2: integrate Claude for optimization
-        plan = {
-            "migration_id": str(uuid.uuid4()),
-            "tables": [
+        from .migration.claude_planner import MigrationPlanner
+
+        migration_id = str(uuid.uuid4())
+
+        # Check if Claude API is available
+        if settings.anthropic_api_key:
+            planner = MigrationPlanner()
+
+            # For MVP: send basic table info to Claude
+            # In production: connect to Oracle, get actual row counts/sizes
+            claude_tables = [
                 {
                     "name": table,
-                    "chunk_size": request.chunk_size,
-                    "estimated_rows": 10000,
-                    "order": i,
+                    "rows": 1_000_000,  # Placeholder
+                    "size_gb": 1.0,  # Placeholder
+                    "has_fk": True,
                 }
-                for i, table in enumerate(request.tables)
-            ],
-            "estimated_duration_seconds": 3600,
-            "total_tables": len(request.tables),
-        }
+                for table in request.tables
+            ]
+
+            strategy = planner.analyze_schema(
+                tables=claude_tables,
+                available_memory_gb=8,
+                available_bandwidth_mbps=100,
+            )
+
+            plan = {
+                "migration_id": migration_id,
+                "source": "claude_optimized",
+                "tables": [
+                    {
+                        "name": table,
+                        "chunk_size": strategy.get("chunk_size", {}).get(table, request.chunk_size),
+                        "order": strategy.get("table_order", request.tables).index(table)
+                        if table in strategy.get("table_order", [])
+                        else request.tables.index(table),
+                    }
+                    for table in request.tables
+                ],
+                "num_workers": strategy.get("num_workers", 4),
+                "estimated_duration_seconds": strategy.get("estimated_duration_minutes", 60) * 60,
+                "total_tables": len(request.tables),
+                "recommendations": strategy.get("optimizations", []),
+                "risks": strategy.get("risks", []),
+            }
+        else:
+            # Fallback: basic plan without Claude
+            plan = {
+                "migration_id": migration_id,
+                "source": "default",
+                "tables": [
+                    {
+                        "name": table,
+                        "chunk_size": request.chunk_size,
+                        "order": i,
+                    }
+                    for i, table in enumerate(request.tables)
+                ],
+                "num_workers": request.num_workers,
+                "estimated_duration_seconds": 3600,
+                "total_tables": len(request.tables),
+                "recommendations": [],
+                "risks": ["Claude not available - using default strategy"],
+            }
 
         return plan
     except Exception as e:
