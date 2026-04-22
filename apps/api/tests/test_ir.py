@@ -8,21 +8,16 @@ import pytest
 
 from src.core.diagnostics.diagnostic import Diagnostic, Severity, Span
 from src.core.ir.nodes import (
-    Column,
     ConstructRef,
     ConstructTag,
-    Constraint,
     Module,
     ObjectKind,
     Package,
-    Parameter,
     Sequence,
-    SchemaObject,
     Subprogram,
     Table,
     Tier,
     TIER_FOR_TAG,
-    TypeRef,
     View,
 )
 

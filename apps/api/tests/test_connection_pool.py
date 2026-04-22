@@ -5,7 +5,7 @@ Tests connection pooling, health monitoring, and statistics.
 
 import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from src.connectors.connection_pool import (
     ConnectionPool,

@@ -4,7 +4,6 @@ Validates save/resume logic and progress tracking.
 """
 
 import pytest
-from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import uuid

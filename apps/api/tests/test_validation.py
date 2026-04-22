@@ -6,7 +6,6 @@ import pytest
 from src.utils.validation import (
     InputValidator,
     RateLimiter,
-    ValidationError,
 )
 
 

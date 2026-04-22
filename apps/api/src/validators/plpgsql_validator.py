@@ -5,7 +5,7 @@ This is critical: we reject any hallucinated syntax before returning to user.
 import re
 import logging
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 logger = logging.getLogger(__name__)
 

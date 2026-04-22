@@ -1,7 +1,6 @@
 """Integration tests for Phase 1 /api/v1/analyze endpoint."""
 
 import pytest
-import json
 import io
 import zipfile
 from fastapi.testclient import TestClient

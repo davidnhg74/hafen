@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from ..analyze.app_impact import Finding, RiskLevel, _rank
+from ..analyze.app_impact import RiskLevel
 from ..analyze.complexity import ComplexityReport
 
 

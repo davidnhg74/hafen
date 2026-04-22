@@ -4,17 +4,12 @@ These run on whichever implementation is active (interim by default; ANTLR
 when `_generated/` exists). Both must satisfy these assertions — they are
 the contract.
 """
-import pytest
 
 from src.core.ir.nodes import (
     ConstructTag,
     ObjectKind,
-    Package,
-    Sequence,
     Subprogram,
     Table,
-    Trigger,
-    View,
     Index,
 )
 from src.source.oracle.parser import parse

@@ -16,7 +16,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Iterable, List, Optional
 
-from ...analyze.app_impact import AppImpactReport, Finding, FileImpact, RiskLevel
+from ...analyze.app_impact import AppImpactReport, Finding
 from ...core.ir.nodes import Module, ObjectKind
 from ..client import AIClient
 from ..prompts.app_impact import SYSTEM_PROMPT, VERSION, render_user_message

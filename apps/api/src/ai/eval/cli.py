@@ -12,7 +12,6 @@ runner.format_report(); exit code is 0 on full pass, 1 on any failure.
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from typing import Dict
 

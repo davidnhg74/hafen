@@ -51,6 +51,28 @@ target-version = ["py312"]
 line-length = 100
 target-version = "py312"
 
+[tool.ruff.lint]
+# Default ruleset (E, F, W) plus our additions.
+# These rule families flag the things we keep (real bugs):
+#   F     — pyflakes (undefined names, unused imports — F401)
+#   E7,E9 — pycodestyle errors that are actual bugs
+# These we ignore as deliberate choices in this codebase:
+#   E402  — module-level import not at top: main.py uses conditional imports
+#           for optional deps (sentence_transformers); intentional pattern.
+#   E702  — multiple statements per line: hand-coded tokenizer uses `;`
+#           sparingly for compactness; doesn't help readability to break.
+#   E712  — comparison to True/False: clearer than `is True` in some tests.
+#   E722  — bare except: pre-existing connector code intentionally
+#           swallows everything around session cleanup; rewriting them is
+#           a separate task.
+#   E731  — lambda assignment: pre-existing factory patterns.
+#   F841  — unused local: tests sometimes assign for clarity.
+ignore = ["E402", "E702", "E712", "E722", "E731", "F841"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use star imports + unused params/fixtures freely.
+"tests/**/*.py" = ["F401", "F403"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

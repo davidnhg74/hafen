@@ -3,10 +3,9 @@ Conversion case storage and retrieval.
 Stores successful conversions in PostgreSQL with pgvector for similarity search.
 """
 
-from sqlalchemy import Column, String, Text, Integer, Float, DateTime, func
 from sqlalchemy.orm import Session
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 from .embeddings import EmbeddingGenerator
 
 

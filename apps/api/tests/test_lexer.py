@@ -6,7 +6,7 @@ wrong, so we'll catch any regression even after the ANTLR swap.
 """
 import pytest
 
-from src.source.oracle._lexer import Lexer, Token, TokenKind, tokenize
+from src.source.oracle._lexer import TokenKind, tokenize
 
 
 # ─── Comments ────────────────────────────────────────────────────────────────

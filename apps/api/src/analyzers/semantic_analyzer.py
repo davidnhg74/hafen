@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 from enum import Enum
 import re
-import json
 import logging
 
 logger = logging.getLogger(__name__)

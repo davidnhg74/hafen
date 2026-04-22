@@ -5,7 +5,6 @@ miss anything outside the document metadata. We use `pypdf` to extract
 the actual rendered text and assert on that.
 """
 import io
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest

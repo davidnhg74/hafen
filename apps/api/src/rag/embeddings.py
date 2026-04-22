@@ -3,7 +3,6 @@ Embedding generation for PL/SQL code snippets.
 Uses sentence-transformers with a code-aware model for semantic similarity.
 """
 
-import numpy as np
 from sentence_transformers import SentenceTransformer
 from typing import List
 

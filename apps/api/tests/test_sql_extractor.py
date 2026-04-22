@@ -4,7 +4,6 @@ import pytest
 from src.analyze.sql_extractor import (
     JAVA_EXTRACTOR,
     PYTHON_EXTRACTOR,
-    SQL_EXTRACTOR,
     looks_like_sql,
     pick_extractor,
 )

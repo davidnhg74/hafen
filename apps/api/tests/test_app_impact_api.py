@@ -7,7 +7,7 @@ and isolates each test from session state.
 import io
 import zipfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI

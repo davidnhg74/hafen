@@ -10,9 +10,7 @@ import logging
 import threading
 from queue import Queue, Empty
 
-from .connection_manager import ConnectionManager, ConnectionConfig
-from .oracle_connector import OracleConnector
-from .postgres_connector import PostgresConnector
+from .connection_manager import ConnectionManager
 
 logger = logging.getLogger(__name__)
 

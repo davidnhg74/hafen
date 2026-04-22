@@ -34,11 +34,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence, Set
 
-from ..core.diagnostics.diagnostic import Span
 from ..core.ir.nodes import ConstructTag, Module, ObjectKind, Tier, TIER_FOR_TAG
 from ..source.oracle._lexer import Token, TokenKind, tokenize
 from .sql_extractor import (
-    EXTRACTORS,
     SqlFragment,
     extract_from_file,
     pick_extractor,

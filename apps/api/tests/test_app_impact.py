@@ -6,8 +6,6 @@ import pytest
 
 from src.analyze.app_impact import (
     AppImpactAnalyzer,
-    AppImpactReport,
-    Finding,
     RiskLevel,
 )
 from src.core.ir.nodes import ConstructTag

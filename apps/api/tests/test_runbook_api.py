@@ -2,7 +2,7 @@
 import io
 import zipfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI
@@ -210,7 +210,8 @@ class TestErrors:
 
     def test_schema_with_no_sql_files(self, client):
         # Zip contains a .txt file but no .sql files — must 400.
-        import io, zipfile
+        import io
+        import zipfile
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
             zf.writestr("readme.txt", "no sql here")

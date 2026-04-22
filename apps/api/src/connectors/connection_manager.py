@@ -6,7 +6,6 @@ Handles encryption, credential persistence, and connection lifecycle.
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from cryptography.fernet import Fernet
-import json
 import logging
 import os
 

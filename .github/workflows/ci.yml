@@ -67,8 +67,9 @@ jobs:
         run: python3 scripts/generate_grammar.py
       - name: Verify ANTLR path activated
         working-directory: apps/api
+        # `python -c` does not auto-add CWD to sys.path; PYTHONPATH=. fixes that.
         run: |
-          python3 -c "from src.source.oracle import _visitor; \
+          PYTHONPATH=. python3 -c "from src.source.oracle import _visitor; \
             assert _visitor.is_available(), 'ANTLR _generated/ not importable after make grammar'"
       - name: Bootstrap extensions
         run: |

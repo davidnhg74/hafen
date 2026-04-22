@@ -10,7 +10,6 @@ the bytes (write to disk, return from FastAPI as application/pdf, ...).
 from __future__ import annotations
 
 import io
-from typing import List
 
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import LETTER

@@ -2,7 +2,6 @@
 
 Mocks the underlying AIClient via dependency injection — no LLM calls.
 """
-import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -112,7 +111,7 @@ class TestExplainerEnrichesFindings:
 
         # Risk-rank of CRITICAL > HIGH > MEDIUM > LOW. The first batch
         # (first two seen_codes) should both be CRITICAL.
-        from src.analyze.app_impact import RiskLevel, _rank
+        from src.analyze.app_impact import RiskLevel
         all_findings = [f for fi in report.files for f in fi.findings]
         by_code = {f.code: f.risk for f in all_findings}
         # Drop dup codes (one finding per code is fine for this assertion).

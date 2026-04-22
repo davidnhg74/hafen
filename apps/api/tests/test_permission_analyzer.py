@@ -6,8 +6,7 @@ Tests Oracle privilege extraction and mapping to PostgreSQL.
 import pytest
 import json
 from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
-from sqlalchemy.orm import Session
+from unittest.mock import Mock
 
 from src.analyzers.permission_analyzer import (
     OraclePrivilegeExtractor,

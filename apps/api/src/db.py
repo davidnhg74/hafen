@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 from contextlib import contextmanager
 from .config import settings
 

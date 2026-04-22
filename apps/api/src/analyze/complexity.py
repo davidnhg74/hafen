@@ -15,7 +15,6 @@ from typing import Dict, List
 from ..core.ir.nodes import (
     ConstructRef,
     Module,
-    ObjectKind,
     SchemaObject,
     Subprogram,
     Tier,

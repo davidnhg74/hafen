@@ -5,7 +5,7 @@ Handles connection pooling, session management, and query execution.
 
 from sqlalchemy import create_engine, pool, text
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import OperationalError, DatabaseError
+from sqlalchemy.exc import OperationalError
 from typing import Optional, List, Dict, Any
 import logging
 from datetime import datetime

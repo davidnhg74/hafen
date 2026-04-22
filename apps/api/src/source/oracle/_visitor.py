@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import importlib
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Tuple
+from typing import List, Optional
 
 from ...core.diagnostics.diagnostic import Diagnostic, Severity, Span
 from ...core.ir.nodes import (
@@ -30,12 +30,10 @@ from ...core.ir.nodes import (
     Module,
     ObjectKind,
     Package,
-    SchemaObject,
     Sequence,
     Subprogram,
     Table,
     Trigger,
-    UnsupportedConstruct,
     View,
 )
 

@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 import enum
 from pydantic import BaseModel
-from typing import Dict, List, Optional, Any
+from typing import Dict, List
 from .db import Base
 
 

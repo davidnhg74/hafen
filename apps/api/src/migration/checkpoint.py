@@ -3,13 +3,14 @@ Checkpoint management for resumable migrations.
 Saves state every N% to allow recovery from failures.
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, JSON, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Session
 from datetime import datetime
-from typing import Union
+from typing import TYPE_CHECKING, Optional, Union
 import uuid
 import logging
+
+if TYPE_CHECKING:
+    from ..models import MigrationCheckpointRecord
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,7 @@ class CheckpointManager:
 
     def get_latest_checkpoint(
         self, migration_id: str, table_name: str
-    ) -> "MigrationCheckpointRecord" or None:
+    ) -> "Optional[MigrationCheckpointRecord]":
         """Get the most recent checkpoint for a table."""
         from ..models import MigrationCheckpointRecord
 
@@ -133,7 +134,7 @@ class CheckpointManager:
 
     def resume_from_checkpoint(
         self, migration_id: str, table_name: str
-    ) -> dict or None:
+    ) -> Optional[dict]:
         """Get resumption point for a table."""
         checkpoint = self.get_latest_checkpoint(migration_id, table_name)
 
@@ -257,7 +258,6 @@ class CheckpointManager:
 
     def mark_table_failed(self, migration_id: str, table_name: str, error_message: str) -> None:
         """Mark a table as failed with error message."""
-        from ..models import MigrationCheckpointRecord
 
         # Get latest checkpoint
         checkpoint = self.get_latest_checkpoint(migration_id, table_name)

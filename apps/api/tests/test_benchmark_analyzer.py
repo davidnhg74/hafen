@@ -5,8 +5,7 @@ Tests Oracle v$sql vs PostgreSQL pg_stat_statements comparison.
 
 import pytest
 from datetime import datetime
-from unittest.mock import Mock, patch
-import json
+from unittest.mock import Mock
 
 from src.analyzers.benchmark_analyzer import (
     BenchmarkCapture,

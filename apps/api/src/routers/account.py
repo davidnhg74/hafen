@@ -5,12 +5,10 @@ from pydantic import BaseModel, EmailStr
 import uuid
 import hashlib
 import secrets
-from datetime import datetime
 from ..db import get_db
 from ..models import User, ApiKey
 from ..auth.password import hash_password, verify_password
 from ..auth.dependencies import get_current_user
-from ..config import settings
 
 router = APIRouter(prefix="/api/v4/account", tags=["account"])
 

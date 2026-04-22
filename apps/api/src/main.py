@@ -26,13 +26,13 @@ except ImportError:
     EmbeddingGenerator = None
     logger.warning("RAG features disabled - sentence_transformers not installed")
 from .migration import CheckpointManager
-from .connectors import ConnectionConfig, get_connection_manager
+from .connectors import get_connection_manager
 from .cost_calculator import CostCalculator, DatabaseSize, DeploymentType
-from .analyzers.permission_analyzer import PermissionAnalyzer, OraclePrivilegeExtractor
-from .analyzers.benchmark_analyzer import BenchmarkCapture, BenchmarkComparator
+from .analyzers.permission_analyzer import PermissionAnalyzer
+from .analyzers.benchmark_analyzer import BenchmarkComparator
 from .llm.client import LLMClient
 from .models import MigrationWorkflow, BenchmarkCapture as BenchmarkCaptureModel, MigrationReport
-from .connectors.connection_pool import get_connection_pool, get_stats_cache
+from .connectors.connection_pool import get_connection_pool
 from .routers import auth, account, billing, support
 from .api.routes import app_impact as app_impact_route
 from .api.routes import runbook as runbook_route

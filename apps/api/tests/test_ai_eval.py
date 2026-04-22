@@ -5,7 +5,6 @@ tested with a stub invoker so no LLM is called. Suite loading is tested
 against the bundled corpus to lock in the JSONL format.
 """
 import json
-from pathlib import Path
 
 import pytest
 
@@ -17,7 +16,6 @@ from src.ai.eval import (
 )
 from src.ai.eval.runner import format_report
 from src.ai.eval.scorer import evaluate
-from src.ai.eval.types import RuleResult
 
 
 def _rule(kind: str, config) -> ScoreRule:

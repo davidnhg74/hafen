@@ -5,12 +5,10 @@ Tests migration checkpoints, resumption, and error recovery.
 
 import pytest
 import uuid
-from datetime import datetime
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from sqlalchemy.orm import Session
 
 from src.migration.checkpoint import MigrationCheckpoint, CheckpointManager
-from src.models import MigrationCheckpointRecord, MigrationRecord
 
 
 class TestMigrationCheckpoint:

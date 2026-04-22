@@ -23,7 +23,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from ...analyze.app_impact import AppImpactAnalyzer
 from ...analyze.complexity import analyze as analyze_complexity

@@ -4,11 +4,10 @@ Tests DDL extraction, static analysis, and Claude integration.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from src.analyzers.semantic_analyzer import (
     StaticDDLExtractor,
     SemanticAnalyzer,
-    SemanticIssue,
     IssueSeverity,
     IssueType,
 )

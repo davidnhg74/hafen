@@ -1,7 +1,6 @@
 """
 Tests for migration progress reporting.
 """
-import pytest
 from src.models import MigrationReport
 
 

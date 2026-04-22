@@ -31,7 +31,7 @@ def send_verification_email(email: str, token: str, frontend_url: str) -> bool:
     try:
         resend.Emails.send(
             {
-                "from": f"Depart <noreply@depart.io>",
+                "from": "Depart <noreply@depart.io>",
                 "to": email,
                 "subject": "Verify Your Depart Account",
                 "html": html_content,

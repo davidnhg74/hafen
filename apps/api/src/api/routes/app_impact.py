@@ -14,7 +14,6 @@ counts so the caller can see how many enrichments succeeded.
 from __future__ import annotations
 
 import logging
-import shutil
 import tempfile
 import zipfile
 from pathlib import Path

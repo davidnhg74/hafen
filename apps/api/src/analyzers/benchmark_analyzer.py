@@ -8,7 +8,6 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 import logging
 import re
-from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 

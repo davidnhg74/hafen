@@ -34,9 +34,9 @@ import logging
 import os
 import re
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from threading import Lock
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional
 
 from anthropic import Anthropic, APIError, APIStatusError
 

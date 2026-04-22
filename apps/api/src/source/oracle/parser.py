@@ -39,7 +39,7 @@ from ...core.ir.nodes import (
     Trigger,
     View,
 )
-from ._lexer import Lexer, Token, TokenKind, tokenize
+from ._lexer import Token, TokenKind, tokenize
 
 
 DIALECT = "oracle"
