@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import AuthGuard from '../components/AuthGuard';
 
 interface WorkflowData {
   id: string;
@@ -100,7 +101,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function MigrationCockpitPage() {
+function MigrationCockpitPageContent() {
   const searchParams = useSearchParams();
   const workflowId = searchParams.get('workflow_id');
 
@@ -340,5 +341,13 @@ export default function MigrationCockpitPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MigrationCockpitPage() {
+  return (
+    <AuthGuard>
+      <MigrationCockpitPageContent />
+    </AuthGuard>
   );
 }

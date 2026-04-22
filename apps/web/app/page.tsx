@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import AuthGuard from './components/AuthGuard';
 import UploadZone from './components/UploadZone';
 import ReportPreview from './components/ReportPreview';
 
-export default function Home() {
+function HomeContent() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
 
@@ -114,5 +115,13 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <AuthGuard>
+      <HomeContent />
+    </AuthGuard>
   );
 }

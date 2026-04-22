@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import AuthGuard from '../components/AuthGuard';
 import DiffViewer from '../components/DiffViewer';
 import SemanticIssuesPanel from '../components/SemanticIssuesPanel';
 import Editor from '@monaco-editor/react';
 
 type ConstructType = 'PROCEDURE' | 'FUNCTION' | 'TABLE' | 'VIEW' | 'SEQUENCE' | 'INDEX';
 
-export default function ConvertPage() {
+function ConvertPageContent() {
   const [inputCode, setInputCode] = useState('');
   const [constructType, setConstructType] = useState<ConstructType>('PROCEDURE');
   const [outputCode, setOutputCode] = useState('');
@@ -326,3 +327,11 @@ WHERE salary > 50000;`,
     },
   ],
 };
+
+export default function ConvertPage() {
+  return (
+    <AuthGuard>
+      <ConvertPageContent />
+    </AuthGuard>
+  );
+}
