@@ -13,7 +13,6 @@ export default function Home() {
       {/* Header */}
       <header className="gradient-bg text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">Depart</h1>
           <p className="text-xl text-purple-100">
             Escape Oracle Licensing with AI-Powered PL/SQL to PostgreSQL Migration
           </p>
@@ -85,6 +84,20 @@ export default function Home() {
                 className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition font-medium"
               >
                 Open Converter →
+              </a>
+            </div>
+
+            {/* Phase 3: ROI Calculator CTA */}
+            <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm p-6 border border-green-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Need to justify the migration?</h2>
+              <p className="text-gray-700 mb-4">
+                Use our ROI calculator to show your CFO exactly how much you'll save by migrating from Oracle to PostgreSQL.
+              </p>
+              <a
+                href="/pricing"
+                className="inline-block bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition font-medium"
+              >
+                Calculate ROI →
               </a>
             </div>
           </div>
