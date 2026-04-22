@@ -133,25 +133,55 @@ class OracleFunctionConverter:
 
         return result
 
+    def _split_args(self, args_str: str) -> list:
+        """Split function arguments respecting nested parentheses."""
+        args, depth, current = [], 0, []
+        for ch in args_str:
+            if ch == '(':
+                depth += 1
+            elif ch == ')':
+                depth -= 1
+            if ch == ',' and depth == 0:
+                args.append(''.join(current).strip())
+                current = []
+            else:
+                current.append(ch)
+        if current:
+            args.append(''.join(current).strip())
+        return args
+
     def _convert_decode(self, code: str) -> str:
         """Convert DECODE(expr, when1, then1, when2, then2, ..., else) to CASE statement."""
-        # This is complex; for now, flag it for review
-        pattern = r"\bDECODE\s*\("
-        if re.search(pattern, code, re.IGNORECASE):
-            # For simple DECODE, we can auto-convert
-            # Example: DECODE(x, 1, 'a', 0, 'b') → CASE WHEN x=1 THEN 'a' WHEN x=0 THEN 'b' END
-            # For now, flag for DBA review (Phase 2 MVP)
-            pass
-        return code
+        def replace_decode(match):
+            args_str = match.group(1)
+            args = self._split_args(args_str)
+            if len(args) < 3:
+                return match.group(0)
+            expr = args[0]
+            pairs = args[1:]
+            parts = [f"CASE {expr}"]
+            i = 0
+            while i < len(pairs) - 1:
+                parts.append(f"WHEN {pairs[i]} THEN {pairs[i+1]}")
+                i += 2
+            if i < len(pairs):
+                parts.append(f"ELSE {pairs[i]}")
+            parts.append("END")
+            return " ".join(parts)
+
+        return re.sub(r"\bDECODE\s*\(([^)]*(?:\([^)]*\)[^)]*)*)\)", replace_decode, code, flags=re.IGNORECASE)
 
     def _convert_nvl2(self, code: str) -> str:
         """Convert NVL2(expr, if_not_null, if_null) to CASE statement."""
-        pattern = r"\bNVL2\s*\("
-        if re.search(pattern, code, re.IGNORECASE):
-            # Would need to parse the function arguments
-            # For now, flag for review
-            pass
-        return code
+        def replace_nvl2(match):
+            args_str = match.group(1)
+            args = self._split_args(args_str)
+            if len(args) != 3:
+                return match.group(0)
+            expr, not_null, null_val = args
+            return f"CASE WHEN {expr} IS NOT NULL THEN {not_null} ELSE {null_val} END"
+
+        return re.sub(r"\bNVL2\s*\(([^)]*(?:\([^)]*\)[^)]*)*)\)", replace_nvl2, code, flags=re.IGNORECASE)
 
     def _convert_listagg(self, code: str) -> str:
         """Convert LISTAGG to STRING_AGG."""
