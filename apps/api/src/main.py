@@ -31,6 +31,7 @@ from .analyzers.permission_analyzer import PermissionAnalyzer, OraclePrivilegeEx
 from .analyzers.benchmark_analyzer import BenchmarkCapture, BenchmarkComparator
 from .llm.client import LLMClient
 from .models import MigrationWorkflow, BenchmarkCapture as BenchmarkCaptureModel
+from .connectors.connection_pool import get_connection_pool, get_stats_cache
 
 app = FastAPI(title="Depart API", version="0.2.0")
 
@@ -121,6 +122,38 @@ class BenchmarkComparisonResponse(BaseModel):
     table_comparisons: list[dict]
     overall_assessment: str
     generated_at: str
+
+
+# ============================================================================
+# Phase 3.3: Connection Management Models
+# ============================================================================
+
+class ConnectionTestRequest(BaseModel):
+    database_type: str  # "oracle" or "postgres"
+    host: str
+    port: int
+    username: str
+    password: str
+    service_name: Optional[str] = None  # Oracle
+    database: Optional[str] = None  # PostgreSQL
+
+
+class ConnectionListResponse(BaseModel):
+    connection_id: str
+    database_type: str
+    host: str
+    port: int
+    connected: bool
+
+
+class ConnectionStatsResponse(BaseModel):
+    connection_id: str
+    database_type: str
+    created_at: str
+    last_used: str
+    use_count: int
+    health_status: str
+    response_time_ms: float
 
 
 # Create uploads directory
@@ -1144,6 +1177,110 @@ async def get_workflow_progress(workflow_id: str, db: Session = Depends(get_db))
         raise
     except Exception as e:
         logger.error(f"Error getting workflow progress: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Phase 3.3: Connection Management Endpoints
+# ============================================================================
+
+@app.post("/api/v3/connections/test")
+async def test_connection(request: ConnectionTestRequest):
+    """Test database connection without storing credentials."""
+    try:
+        from .connectors import ConnectionConfig
+
+        config = ConnectionConfig(
+            database_type=request.database_type,
+            host=request.host,
+            port=request.port,
+            username=request.username,
+            password=request.password,
+            service_name=request.service_name,
+            database=request.database,
+        )
+
+        manager = get_connection_manager()
+        result = manager.test_connection(config)
+
+        return result
+    except Exception as e:
+        logger.error(f"Connection test error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v3/connections/list")
+async def list_connections():
+    """List all active database connections."""
+    try:
+        manager = get_connection_manager()
+        connections = manager.list_connections()
+
+        return {
+            "connections": [
+                ConnectionListResponse(
+                    connection_id=conn_id,
+                    database_type=conn_data["type"],
+                    host=conn_data["host"],
+                    port=conn_data["port"],
+                    connected=conn_data["connected"],
+                )
+                for conn_id, conn_data in connections.items()
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Error listing connections: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v3/connections/{connection_id}/stats")
+async def get_connection_stats(connection_id: str):
+    """Get statistics for a pooled connection."""
+    try:
+        pool = get_connection_pool()
+        stats = pool.get_stats(connection_id)
+
+        if not stats:
+            raise HTTPException(status_code=404, detail="Connection not found in pool")
+
+        return ConnectionStatsResponse(
+            connection_id=stats.connection_id,
+            database_type=stats.database_type,
+            created_at=stats.created_at.isoformat(),
+            last_used=stats.last_used.isoformat(),
+            use_count=stats.use_count,
+            health_status=stats.health_status,
+            response_time_ms=stats.response_time_ms,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting connection stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v3/connections/{connection_id}/health")
+async def check_connection_health(connection_id: str):
+    """Check health of a specific connection."""
+    try:
+        manager = get_connection_manager()
+        connector = manager.get_connector(connection_id)
+
+        if not connector:
+            raise HTTPException(status_code=404, detail="Connection not found")
+
+        health = connector.health_check()
+
+        return {
+            "connection_id": connection_id,
+            "status": health.get("status", "unknown"),
+            "details": health,
+            "checked_at": datetime.utcnow().isoformat(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
