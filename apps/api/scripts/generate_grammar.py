@@ -83,6 +83,22 @@ def generate(force: bool = False) -> int:
     if result.returncode != 0:
         return result.returncode
 
+    # The PL/SQL grammar references hand-written base classes
+    # (PlSqlLexerBase, PlSqlParserBase) that contain semantic predicates and
+    # version flags. ANTLR doesn't generate them — they must be co-located
+    # with the generated Python so `from .PlSqlLexerBase import ...` resolves.
+    # We also patch the upstream's absolute `from PlSqlLexer import ...` to
+    # the relative form required by Python package imports.
+    for base_name in ("PlSqlLexerBase.py", "PlSqlParserBase.py"):
+        src_path = GRAMMAR_DIR / base_name
+        if not src_path.exists():
+            sys.exit(f"Missing required base class file: {src_path}")
+        text = src_path.read_text()
+        # Upstream uses non-package imports; fix them in place during copy.
+        text = text.replace("from PlSqlLexer import", "from .PlSqlLexer import")
+        text = text.replace("from PlSqlParser import", "from .PlSqlParser import")
+        (OUT_DIR / base_name).write_text(text)
+
     print(f"Generated -> {OUT_DIR}", file=sys.stderr)
     return 0
 
