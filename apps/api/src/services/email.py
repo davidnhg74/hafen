@@ -33,9 +33,9 @@ def send_verification_email(email: str, token: str, frontend_url: str) -> bool:
     try:
         resend.Emails.send(
             {
-                "from": "Depart <noreply@depart.io>",
+                "from": "Hafen <noreply@hafen.io>",
                 "to": email,
-                "subject": "Verify Your Depart Account",
+                "subject": "Verify Your Hafen Account",
                 "html": html_content,
             }
         )
@@ -64,9 +64,9 @@ def send_password_reset_email(email: str, token: str, frontend_url: str) -> bool
     try:
         resend.Emails.send(
             {
-                "from": "Depart <noreply@depart.io>",
+                "from": "Hafen <noreply@hafen.io>",
                 "to": email,
-                "subject": "Reset Your Depart Password",
+                "subject": "Reset Your Hafen Password",
                 "html": html_content,
             }
         )
@@ -94,7 +94,7 @@ def send_contact_notification(name: str, email: str, subject: str, message: str)
     try:
         resend.Emails.send(
             {
-                "from": "Depart <noreply@depart.io>",
+                "from": "Hafen <noreply@hafen.io>",
                 "to": settings.support_email,
                 "subject": f"Contact Form: {subject}",
                 "html": html_content,
@@ -117,13 +117,13 @@ def send_ticket_notification(ticket_subject: str, requester_email: str) -> bool:
     <h1>New Support Ticket</h1>
     <p><strong>Subject:</strong> {ticket_subject}</p>
     <p><strong>From:</strong> {requester_email}</p>
-    <p><a href="https://depart.io/admin/tickets">View in Dashboard</a></p>
+    <p><a href="https://hafen.io/admin/tickets">View in Dashboard</a></p>
     """
 
     try:
         resend.Emails.send(
             {
-                "from": "Depart <noreply@depart.io>",
+                "from": "Hafen <noreply@hafen.io>",
                 "to": settings.support_email,
                 "subject": f"New Support Ticket: {ticket_subject}",
                 "html": html_content,

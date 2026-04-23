@@ -14,7 +14,7 @@ Self-hosted installs don't need (and shouldn't run) any of this:
   * no persistent job table — `/assess` runs in-memory
 
 So this router only mounts when `settings.enable_cloud_routes` is True.
-The marketing/purchase site at depart.cloud flips that on; the product
+The marketing/purchase site at hafen.ai flips that on; the product
 image keeps it off.
 
 (The endpoints were previously inlined in `main.py`; moving them here
@@ -47,7 +47,7 @@ router = APIRouter(tags=["cloud-analyze"])
 
 # Uploads directory — same location the old inline handler used so
 # existing PDFs remain reachable across the refactor.
-UPLOADS_DIR = os.environ.get("UPLOADS_DIR", "/tmp/depart_uploads")
+UPLOADS_DIR = os.environ.get("UPLOADS_DIR", "/tmp/hafen_uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 
@@ -202,5 +202,5 @@ async def get_pdf_report(job_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="PDF report not found")
 
     return FileResponse(
-        job.pdf_path, media_type="application/pdf", filename=f"depart_analysis_{job_id}.pdf"
+        job.pdf_path, media_type="application/pdf", filename=f"hafen_analysis_{job_id}.pdf"
     )

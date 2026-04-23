@@ -55,7 +55,7 @@ function AdminOnly({ children }: { children: React.ReactNode }) {
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-8">
             <h1 className="text-2xl font-bold text-amber-900">Admins only</h1>
             <p className="mt-3 text-amber-800">
-              This page manages users for your depart install. Only accounts
+              This page manages users for your hafen install. Only accounts
               with the <code className="rounded bg-white px-1">admin</code>{' '}
               role can see it. Ask an admin on your team to add you, or to
               change your role.
@@ -100,7 +100,7 @@ function UsersContent() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Users</h1>
           <p className="mt-2 text-gray-600">
-            Manage who can reach this depart instance.{' '}
+            Manage who can reach this hafen instance.{' '}
             <strong>Admin</strong> can do everything.{' '}
             <strong>Operator</strong> can run migrations and use AI conversion.{' '}
             <strong>Viewer</strong> is read-only.

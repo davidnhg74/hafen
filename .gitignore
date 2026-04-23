@@ -59,7 +59,7 @@ postgres_data/
 apps/api/src/source/oracle/_generated/
 
 # Grammar codegen jar cache
-.cache/depart-grammar/
+.cache/hafen-grammar/
 
 # License signing private keys — must never be committed.
 # Dev keys live at ~/.depart-keys/. Production keys are managed
@@ -70,4 +70,4 @@ license_private*.pem
 
 # Air-gap bundle build output — large tarballs with docker images.
 /dist/
-depart-airgap-*.tar.gz
+hafen-airgap-*.tar.gz

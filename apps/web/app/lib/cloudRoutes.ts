@@ -8,7 +8,7 @@
  * but still reads them at request time for server ones.
  *
  * Default is **false** (self-hosted): the same default as the backend.
- * depart.cloud sets NEXT_PUBLIC_ENABLE_CLOUD_ROUTES=true at deploy time.
+ * hafen.ai sets NEXT_PUBLIC_ENABLE_CLOUD_ROUTES=true at deploy time.
  */
 
 export function cloudRoutesEnabled(): boolean {

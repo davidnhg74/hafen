@@ -84,7 +84,7 @@ typecheck: ## Static type-check with mypy
 
 oracle-up: ## Start the Oracle Free test container (multi-GB, slow first boot)
 	docker compose --profile oracle up -d oracle
-	@echo "Oracle starting. Watch readiness with: docker logs -f depart_oracle"
+	@echo "Oracle starting. Watch readiness with: docker logs -f hafen_oracle"
 
 oracle-down: ## Stop the Oracle test container
 	docker compose --profile oracle down oracle

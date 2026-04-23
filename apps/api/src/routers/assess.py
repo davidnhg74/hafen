@@ -1,4 +1,4 @@
-"""Public `/assess` endpoint — the top-of-funnel for depart.cloud.
+"""Public `/assess` endpoint — the top-of-funnel for hafen.ai.
 
 Deliberately minimal: take raw DDL/PL-SQL as a JSON body, run the
 parser + complexity scorer, and return everything the assessment UI

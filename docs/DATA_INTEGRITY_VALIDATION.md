@@ -1,4 +1,4 @@
-# Data Integrity & Accuracy Validation Strategy for Depart
+# Data Integrity & Accuracy Validation Strategy for Hafen
 
 **Critical for Enterprise:** Proving data moved accurately before cutover.
 
@@ -24,7 +24,7 @@ In a 50 TB Oracle → PostgreSQL migration:
 ✗ Trust the ETL tool → Tools hallucinate data all the time
 ```
 
-### Depart's AI-Powered Validation (Comprehensive)
+### Hafen's AI-Powered Validation (Comprehensive)
 
 ```
 ✓ Layer 1: Structural validation (DDL integrity)
@@ -532,7 +532,7 @@ class ProductionMonitor:
 
 ---
 
-## 🛠️ Integration With Depart Converter
+## 🛠️ Integration With Hafen Converter
 
 After PL/SQL code is converted, validate that converted logic produces correct results:
 

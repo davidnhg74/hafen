@@ -59,12 +59,12 @@ from .api.routes import usage as usage_route
 from .auth.dependencies import get_optional_user
 from .services.billing import get_plan_limits
 
-app = FastAPI(title="Depart API", version="0.2.0")
+app = FastAPI(title="Hafen API", version="0.2.0")
 
 
 @app.on_event("startup")
 def _auto_bootstrap_admin() -> None:
-    """If DEPART_ADMIN_EMAIL / DEPART_ADMIN_PASSWORD are set and no
+    """If HAFEN_ADMIN_EMAIL / HAFEN_ADMIN_PASSWORD are set and no
     admin exists yet, create one. Silent no-op otherwise. Runs at
     FastAPI startup, before the first request is served."""
     if not settings.enable_self_hosted_auth:
@@ -209,7 +209,7 @@ class ConnectionStatsResponse(BaseModel):
 
 
 # Create uploads directory
-UPLOADS_DIR = Path("/tmp/depart_uploads")
+UPLOADS_DIR = Path("/tmp/hafen_uploads")
 UPLOADS_DIR.mkdir(exist_ok=True)
 
 
@@ -244,7 +244,7 @@ app.include_router(usage_route.router)
 # Cloud-only routers — signup/login, billing, support tickets, per-user API
 # keys, and the legacy email-gated /api/v1/analyze zip-upload flow. The
 # self-hosted product image ships without these (no Stripe, no email
-# dependency, no user accounts, no Lead/Job persistence); depart.cloud
+# dependency, no user accounts, no Lead/Job persistence); hafen.ai
 # mounts them via the ENABLE_CLOUD_ROUTES env flag.
 if settings.enable_cloud_routes:
     app.include_router(auth.router)

@@ -147,7 +147,7 @@ def _build_phases(ctx: RunbookContext) -> List[RunbookPhase]:
                 "Customer DBA available for 2–4 hours of walkthroughs",
             ],
             activities=[
-                "Run the Depart complexity analyzer against the full DDL",
+                "Run the Hafen complexity analyzer against the full DDL",
                 "Run the app-impact analyzer against the application repos in scope",
                 "Capture v$sql top-50 by elapsed time as the perf baseline",
                 "Confirm cutover window and downtime tolerance",
@@ -383,8 +383,8 @@ def _build_sign_offs(ctx: RunbookContext) -> List[str]:
         f"{ctx.customer} — Engineering Lead",
         f"{ctx.customer} — DBA / Data Platform Lead",
         f"{ctx.customer} — Application Owner(s) (per impacted codebase)",
-        "Depart — Migration Engineer",
-        "Depart — Engineering Manager (release captain)",
+        "Hafen — Migration Engineer",
+        "Hafen — Engineering Manager (release captain)",
     ]
 
 

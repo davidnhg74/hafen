@@ -108,7 +108,7 @@ function HomeContent() {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-12 mt-16">
         <div className="container mx-auto px-4 text-center">
-          <p className="mb-2">© 2024 Depart. All rights reserved.</p>
+          <p className="mb-2">© 2024 Hafen. All rights reserved.</p>
           <p className="text-sm">
             Built by Oracle DBAs, for teams migrating off Oracle to PostgreSQL
           </p>

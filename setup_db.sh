@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Setup database for Depart development
+# Setup database for Hafen development
 
 set -e
 
-echo "🔧 Setting up Depart database..."
+echo "🔧 Setting up Hafen database..."
 
 # PostgreSQL connection details
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
-DB_USER="${DB_USER:-depart}"
-DB_PASSWORD="${DB_PASSWORD:-depart_dev_pw}"
-DB_NAME="${DB_NAME:-depart_dev}"
+DB_USER="${DB_USER:-hafen}"
+DB_PASSWORD="${DB_PASSWORD:-hafen_dev_pw}"
+DB_NAME="${DB_NAME:-hafen_dev}"
 
 # Colors
 RED='\033[0;31m'

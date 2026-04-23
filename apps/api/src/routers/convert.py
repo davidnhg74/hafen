@@ -281,7 +281,7 @@ _DBLINK = _Ex(
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 CREATE SERVER prod_server
     FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host 'prod.db.internal', dbname 'depart', port '5432');
+    OPTIONS (host 'prod.db.internal', dbname 'hafen', port '5432');
 CREATE USER MAPPING FOR current_user
     SERVER prod_server OPTIONS (user 'reader', password :pw);
 

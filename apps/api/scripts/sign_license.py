@@ -1,4 +1,4 @@
-"""Sign a depart license JWT (dev helper).
+"""Sign a hafen license JWT (dev helper).
 
 Reads the private key from ~/.depart-keys/license_private_dev.pem by
 default and emits an RS256 JWT with the claims the verifier expects.

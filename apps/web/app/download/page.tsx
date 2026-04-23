@@ -2,12 +2,12 @@
  * /download — the product's entry point.
  *
  * The self-hosted product lives here, not /signup. The page prioritizes
- * "get depart running on your machine in two commands" over funnel-y
+ * "get hafen running on your machine in two commands" over funnel-y
  * registration flows. Three install methods listed: compose (dev/demo),
  * single Docker image (staging), and OVA/tarball (air-gapped prod).
  *
  * Everything below the first fold is about reassuring compliance /
- * security reviewers: network flow, what depart can and cannot see,
+ * security reviewers: network flow, what hafen can and cannot see,
  * license verification.
  */
 
@@ -36,10 +36,10 @@ function Header() {
   return (
     <div className="mb-10 text-center">
       <h1 className="text-4xl font-bold text-gray-900 md:text-5xl">
-        Download depart
+        Download hafen
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-        depart ships as a self-hosted bundle. The web UI, API, parser, AI gateway, and
+        hafen ships as a self-hosted bundle. The web UI, API, parser, AI gateway, and
         data-movement runner all run on your machine. Nothing phones home.
       </p>
     </div>
@@ -55,8 +55,8 @@ function QuickStart() {
       </p>
       <pre className="mt-6 overflow-x-auto rounded-lg bg-gray-900 p-6 font-mono text-sm text-green-200">
 {`# 1. Clone the repo
-git clone https://github.com/davidnhg74/depart.git
-cd depart
+git clone https://github.com/davidnhg74/hafen.git
+cd hafen
 
 # 2. Boot the whole stack
 docker compose up -d
@@ -77,7 +77,7 @@ function Architecture() {
     <section className="mb-12 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
       <h2 className="text-2xl font-bold text-gray-900">What runs where</h2>
       <p className="mt-2 text-gray-600">
-        Every box below lives inside your firewall. The only outbound connection depart ever
+        Every box below lives inside your firewall. The only outbound connection hafen ever
         makes is AI conversion calls to the provider you choose, using the API key you
         provide.
       </p>
@@ -85,7 +85,7 @@ function Architecture() {
       <pre className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-6 font-mono text-xs leading-relaxed text-gray-800">
 {`┌──────────────── your infrastructure ────────────────┐
 │                                                     │
-│  ┌─ depart bundle (Docker compose) ──┐              │
+│  ┌─ hafen bundle (Docker compose) ──┐              │
 │  │                                   │              │
 │  │  Next.js UI ── localhost:3000     │              │
 │  │  FastAPI   ── localhost:8000      │              │
@@ -118,7 +118,7 @@ function Architecture() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <InfoBox
-          title="What depart can see"
+          title="What hafen can see"
           items={[
             'Only what runs on your host',
             'Your Oracle via the read-only user you create',
@@ -127,7 +127,7 @@ function Architecture() {
           tone="neutral"
         />
         <InfoBox
-          title="What depart cannot see"
+          title="What hafen cannot see"
           items={[
             'Anything we could see — because nothing phones home',
             'Your DDL, your data, your connection strings',
@@ -177,7 +177,7 @@ function InstallMethods() {
     {
       title: 'Single Docker image',
       blurb: 'Staging, CI pipelines, Kubernetes.',
-      command: 'docker run -p 3000:3000 -p 8000:8000 depart/depart:latest',
+      command: 'docker run -p 3000:3000 -p 8000:8000 hafen/hafen:latest',
       status: 'Shipping with v0.2',
     },
     {
@@ -283,7 +283,7 @@ function NextSteps() {
       <ul className="mt-4 space-y-3 text-sm text-purple-900">
         <li>
           📘{' '}
-          <a href="https://github.com/davidnhg74/depart/blob/main/docs/getting-started.md" className="underline">
+          <a href="https://github.com/davidnhg74/hafen/blob/main/docs/getting-started.md" className="underline">
             Getting started
           </a>{' '}
           — first-migration walkthrough against the HR sample schema.
@@ -297,7 +297,7 @@ function NextSteps() {
         </li>
         <li>
           💬{' '}
-          <a href="https://github.com/davidnhg74/depart/issues" className="underline">
+          <a href="https://github.com/davidnhg74/hafen/issues" className="underline">
             Open an issue
           </a>{' '}
           — grammar gaps, type-mapping requests, feature asks.

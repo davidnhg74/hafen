@@ -79,7 +79,7 @@ class PostgresConnector:
                 echo=False,
                 connect_args={
                     "connect_timeout": self.timeout_seconds,
-                    "application_name": "depart_migration",
+                    "application_name": "hafen_migration",
                 },
             )
 
@@ -191,7 +191,7 @@ class PostgresConnector:
         """Test CREATE TABLE capability."""
         try:
             session = self.get_session()
-            table_name = "depart_test_migration_table"
+            table_name = "hafen_test_migration_table"
 
             # Create test table
             session.execute(
@@ -223,7 +223,7 @@ class PostgresConnector:
         """Test INSERT capability."""
         try:
             session = self.get_session()
-            table_name = "depart_test_migration_table"
+            table_name = "hafen_test_migration_table"
 
             # Create table
             session.execute(

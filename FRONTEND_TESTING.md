@@ -1,4 +1,4 @@
-# Depart Frontend Testing Guide
+# Hafen Frontend Testing Guide
 
 ## Prerequisites
 

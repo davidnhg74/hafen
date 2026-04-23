@@ -154,7 +154,7 @@ function LoginContent() {
         )}
         {!isCloud && (
           <p className="mt-6 text-center text-xs text-gray-500">
-            This is a self-hosted install — contact your depart admin for an account.
+            This is a self-hosted install — contact your hafen admin for an account.
           </p>
         )}
       </div>

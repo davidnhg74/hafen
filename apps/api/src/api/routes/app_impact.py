@@ -85,7 +85,7 @@ async def analyze_app_impact(
 ):
     lang_list = _parse_languages(languages)
 
-    with tempfile.TemporaryDirectory(prefix="depart_appimpact_") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="hafen_appimpact_") as tmpdir:
         tmp = Path(tmpdir)
         schema_dir = await _unzip_to(schema_zip, tmp / "schema")
         source_dir = await _unzip_to(source_zip, tmp / "source")

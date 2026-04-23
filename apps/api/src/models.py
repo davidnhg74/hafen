@@ -372,7 +372,7 @@ class TicketMessage(Base):
 class AuditEvent(Base):
     """Append-only record of mutating actions on this install.
 
-    Compliance pattern: an enterprise running depart needs to answer
+    Compliance pattern: an enterprise running hafen needs to answer
     "who ran migration X?", "who uploaded the license that unlocked
     feature Y?", "who changed the Anthropic key?" long after the
     events happen. We denormalize `user_email` onto the row so the

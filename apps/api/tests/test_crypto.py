@@ -31,8 +31,8 @@ from src.services.crypto import (
 def fresh_key(monkeypatch):
     """Set a throwaway Fernet key in env and reset the crypto cache."""
     key = generate_key()
-    monkeypatch.setenv("DEPART_ENCRYPTION_KEY", key)
-    monkeypatch.delenv("DEPART_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.setenv("HAFEN_ENCRYPTION_KEY", key)
+    monkeypatch.delenv("HAFEN_ENCRYPTION_KEYS", raising=False)
     crypto.reset_cache_for_tests()
     yield key
     crypto.reset_cache_for_tests()
@@ -41,8 +41,8 @@ def fresh_key(monkeypatch):
 @pytest.fixture
 def no_key(monkeypatch):
     """Force an unkeyed environment."""
-    monkeypatch.delenv("DEPART_ENCRYPTION_KEY", raising=False)
-    monkeypatch.delenv("DEPART_ENCRYPTION_KEYS", raising=False)
+    monkeypatch.delenv("HAFEN_ENCRYPTION_KEY", raising=False)
+    monkeypatch.delenv("HAFEN_ENCRYPTION_KEYS", raising=False)
     crypto.reset_cache_for_tests()
     yield
     crypto.reset_cache_for_tests()
@@ -74,7 +74,7 @@ class TestHelpers:
         # Use fresh_key to produce ciphertext, then clear env.
         ct = encrypt("the-secret")
         with patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("DEPART_ENCRYPTION_KEY", None)
+            os.environ.pop("HAFEN_ENCRYPTION_KEY", None)
             crypto.reset_cache_for_tests()
             assert has_encryption_key() is False
             with pytest.raises(RuntimeError, match="not set"):
@@ -200,12 +200,12 @@ class TestRotation:
     def test_multifernet_decrypts_old_ciphertext_with_new_key(
         self, db, monkeypatch
     ):
-        """Write with key A. Add key B to the front of DEPART_ENCRYPTION_KEYS.
+        """Write with key A. Add key B to the front of HAFEN_ENCRYPTION_KEYS.
         A read should still work (old key still in the list). A rewrite
         should produce ciphertext readable only by new key."""
         key_a = generate_key()
-        monkeypatch.setenv("DEPART_ENCRYPTION_KEY", key_a)
-        monkeypatch.delenv("DEPART_ENCRYPTION_KEYS", raising=False)
+        monkeypatch.setenv("HAFEN_ENCRYPTION_KEY", key_a)
+        monkeypatch.delenv("HAFEN_ENCRYPTION_KEYS", raising=False)
         crypto.reset_cache_for_tests()
 
         m = MigrationRecord(
@@ -224,8 +224,8 @@ class TestRotation:
 
         # Flip env: new primary key B, old key A still available.
         key_b = generate_key()
-        monkeypatch.delenv("DEPART_ENCRYPTION_KEY", raising=False)
-        monkeypatch.setenv("DEPART_ENCRYPTION_KEYS", f"{key_b},{key_a}")
+        monkeypatch.delenv("HAFEN_ENCRYPTION_KEY", raising=False)
+        monkeypatch.setenv("HAFEN_ENCRYPTION_KEYS", f"{key_b},{key_a}")
         crypto.reset_cache_for_tests()
 
         # New session — read must still succeed via MultiFernet fallback.

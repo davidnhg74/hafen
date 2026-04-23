@@ -3,12 +3,12 @@
 ## Start Services
 
 ```bash
-cd /Users/dnguyen/cld_projects/depart
+cd /Users/dnguyen/cld_projects/hafen
 docker-compose up
 ```
 
 This starts:
-- **PostgreSQL**: localhost:5432 (depart / depart_dev_pw)
+- **PostgreSQL**: localhost:5432 (hafen / hafen_dev_pw)
 - **API**: localhost:8000 (FastAPI with auto-reload)
 - **Web**: localhost:3000 (Next.js with hot reload)
 
@@ -27,8 +27,8 @@ This starts:
 - Health check: http://localhost:8000/health
 
 ### Database
-- Connection string: `postgresql://depart:depart_dev_pw@localhost:5432/depart_dev`
-- Client: `psql -h localhost -U depart -d depart_dev`
+- Connection string: `postgresql://hafen:hafen_dev_pw@localhost:5432/hafen_dev`
+- Client: `psql -h localhost -U hafen -d hafen_dev`
 
 ## API Testing
 

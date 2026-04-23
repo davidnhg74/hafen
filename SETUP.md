@@ -1,4 +1,4 @@
-# Depart Setup Guide
+# Hafen Setup Guide
 
 ## Prerequisites
 
@@ -29,16 +29,16 @@ psql -U postgres -c "SELECT version();"
 ```
 
 This script will:
-- Drop and recreate the `depart_dev` database
+- Drop and recreate the `hafen_dev` database
 - Create all required tables and extensions
 - Set up indexes
 
 Credentials used:
 - Host: `localhost`
 - Port: `5432`
-- User: `depart`
-- Password: `depart_dev_pw`
-- Database: `depart_dev`
+- User: `hafen`
+- Password: `hafen_dev_pw`
+- Database: `hafen_dev`
 
 ### 3. Start the Backend API
 
@@ -87,7 +87,7 @@ The frontend will be available at: `http://localhost:3000`
 
 ```env
 # Database
-DATABASE_URL=postgresql+asyncpg://depart:depart_dev_pw@localhost:5432/depart_dev
+DATABASE_URL=postgresql+asyncpg://hafen:hafen_dev_pw@localhost:5432/hafen_dev
 
 # API
 ENVIRONMENT=development
@@ -98,7 +98,7 @@ ANTHROPIC_API_KEY=sk-...
 
 # Optional: Email (Resend)
 RESEND_API_KEY=re_...
-SUPPORT_EMAIL=support@depart.io
+SUPPORT_EMAIL=support@hafen.io
 
 # Optional: Stripe (billing)
 STRIPE_SECRET_KEY=sk_test_...
@@ -202,6 +202,6 @@ All sensitive data (database passwords, API keys) is never logged or stored in d
 
 - Frontend hot reloads on file changes
 - Backend auto-reloads with `--reload` flag
-- Check database with: `psql -U depart depart_dev`
+- Check database with: `psql -U hafen hafen_dev`
 - View API docs at: http://localhost:8000/docs
 - API logs show SQL when `ENVIRONMENT=development`

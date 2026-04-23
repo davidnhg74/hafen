@@ -4,7 +4,7 @@ import Navigation from "./components/Navigation";
 import AuthInitializer from "./components/AuthInitializer";
 
 export const metadata: Metadata = {
-  title: "Depart — Oracle to PostgreSQL Migration",
+  title: "Hafen — Oracle to PostgreSQL Migration",
   description: "Escape Oracle licensing with AI-powered PL/SQL to PostgreSQL conversion",
 };
 

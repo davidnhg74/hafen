@@ -1,4 +1,4 @@
-# Depart Platform - Deployment Guide
+# Hafen Platform - Deployment Guide
 
 ## Prerequisites
 
@@ -45,7 +45,7 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -e .
 
 # Set environment
-export DATABASE_URL=postgresql://user:pass@localhost:5432/depart
+export DATABASE_URL=postgresql://user:pass@localhost:5432/hafen
 
 # Run tests
 pytest tests/ -v
@@ -73,7 +73,7 @@ docker-compose exec api python -c "from src.db import create_tables; create_tabl
 ### Manual Migration
 
 ```bash
-psql -U depart_user -d depart -h localhost < apps/api/migrations/init.sql
+psql -U hafen_user -d hafen -h localhost < apps/api/migrations/init.sql
 ```
 
 ## Production Deployment
@@ -83,7 +83,7 @@ psql -U depart_user -d depart -h localhost < apps/api/migrations/init.sql
 ```bash
 # .env for production
 ENVIRONMENT=production
-DATABASE_URL=postgresql://user:pass@prod-db:5432/depart
+DATABASE_URL=postgresql://user:pass@prod-db:5432/hafen
 ANTHROPIC_API_KEY=sk-...
 ```
 
@@ -96,8 +96,8 @@ docker-compose -f docker-compose.yml build
 ### 3. Push to Registry
 
 ```bash
-docker push myregistry/depart-api:latest
-docker push myregistry/depart-web:latest
+docker push myregistry/hafen-api:latest
+docker push myregistry/hafen-web:latest
 ```
 
 ### 4. Deploy to K8s (Optional)
@@ -140,7 +140,7 @@ docker-compose logs -f web
 docker-compose ps postgres
 
 # Verify credentials in .env
-docker-compose exec postgres psql -U depart_user -d depart -c "SELECT 1"
+docker-compose exec postgres psql -U hafen_user -d hafen -c "SELECT 1"
 ```
 
 ### API Won't Start
@@ -205,13 +205,13 @@ EXPLAIN ANALYZE SELECT * FROM migrations WHERE status = 'in_progress';
 ### Backup Database
 
 ```bash
-docker-compose exec postgres pg_dump -U depart_user depart > backup.sql
+docker-compose exec postgres pg_dump -U hafen_user hafen > backup.sql
 ```
 
 ### Restore Database
 
 ```bash
-docker-compose exec -T postgres psql -U depart_user depart < backup.sql
+docker-compose exec -T postgres psql -U hafen_user hafen < backup.sql
 ```
 
 ## Scaling Considerations

@@ -212,5 +212,5 @@ class TestSignOffs:
         rb = assemble(base_ctx)
         assert any("Engineering Lead" in s for s in rb.sign_offs)
         assert any("DBA" in s for s in rb.sign_offs)
-        assert any("Depart" in s for s in rb.sign_offs)
+        assert any("Hafen" in s for s in rb.sign_offs)
         assert any(base_ctx.customer in s for s in rb.sign_offs)

@@ -1100,7 +1100,7 @@ Why? Missing indexes, stale stats,
 unexpected query patterns in real workload
 ```
 
-**Depart Performance Benchmarking:**
+**Hafen Performance Benchmarking:**
 ```
 Stage 1: Generate realistic workload from procedures
 Stage 2: Establish Oracle baseline (150ms avg)

@@ -1,4 +1,4 @@
-# RAG (Retrieval-Augmented Generation) system for Depart
+# RAG (Retrieval-Augmented Generation) system for Hafen
 # Stores successful conversion cases and retrieves similar ones to improve conversion quality
 
 from .embeddings import EmbeddingGenerator

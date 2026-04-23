@@ -85,7 +85,7 @@ Run these before considering Phase 1 complete:
 
 ### 1. Docker Compose
 ```bash
-cd /Users/dnguyen/cld_projects/depart
+cd /Users/dnguyen/cld_projects/hafen
 docker compose up -d
 sleep 10  # Wait for services to start
 

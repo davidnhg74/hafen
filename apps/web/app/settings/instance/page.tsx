@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * /settings/instance — local instance configuration for self-hosted depart.
+ * /settings/instance — local instance configuration for self-hosted hafen.
  *
  * Exposes the BYOK Anthropic key today. Once the license verifier
  * lands, the LicensePanel below becomes interactive — tier, expiry,
@@ -96,7 +96,7 @@ function Header() {
     <div className="mb-10">
       <h1 className="text-3xl font-bold text-gray-900">Instance settings</h1>
       <p className="mt-2 text-gray-600">
-        Local-only configuration for this depart instance. Values live in your Postgres
+        Local-only configuration for this hafen instance. Values live in your Postgres
         metadata DB; nothing is synced to any cloud service.
       </p>
     </div>
@@ -373,7 +373,7 @@ function EncryptionSection({ status }: { status: SettingsStatus | null }) {
         'Rotate the encryption key? The API will re-encrypt every stored secret ' +
           '(DB connection strings, Anthropic key, license, OIDC client secret) ' +
           'with the current primary key. Make sure the new key is already in ' +
-          'DEPART_ENCRYPTION_KEYS and the server has been restarted.',
+          'HAFEN_ENCRYPTION_KEYS and the server has been restarted.',
       )
     ) {
       return;
@@ -410,7 +410,7 @@ function EncryptionSection({ status }: { status: SettingsStatus | null }) {
       <p className="mt-3 text-sm text-gray-600">
         Sensitive columns — DB connection strings, Anthropic key, license JWT,
         OIDC client secret — are encrypted with Fernet when a key is
-        configured via <code className="rounded bg-gray-100 px-1">DEPART_ENCRYPTION_KEY</code>.
+        configured via <code className="rounded bg-gray-100 px-1">HAFEN_ENCRYPTION_KEY</code>.
       </p>
 
       {!configured && (
@@ -424,7 +424,7 @@ function EncryptionSection({ status }: { status: SettingsStatus | null }) {
               </code>
             </li>
             <li>
-              Set <code className="rounded bg-white px-1">DEPART_ENCRYPTION_KEY=&lt;that-key&gt;</code>{' '}
+              Set <code className="rounded bg-white px-1">HAFEN_ENCRYPTION_KEY=&lt;that-key&gt;</code>{' '}
               in the API container&apos;s env.
             </li>
             <li>Restart the API. New writes will be encrypted automatically.</li>
@@ -448,7 +448,7 @@ function EncryptionSection({ status }: { status: SettingsStatus | null }) {
           </button>
           <p className="mt-2 text-xs text-gray-500">
             Use after you&apos;ve prepended a fresh key to{' '}
-            <code className="rounded bg-gray-100 px-1">DEPART_ENCRYPTION_KEYS</code>{' '}
+            <code className="rounded bg-gray-100 px-1">HAFEN_ENCRYPTION_KEYS</code>{' '}
             and restarted the API.
           </p>
         </div>

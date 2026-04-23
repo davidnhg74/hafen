@@ -376,7 +376,7 @@ async def sso_callback(
 def _callback_url(request: Request) -> str:
     """Compute the absolute callback URL the IdP should redirect to.
 
-    We honor X-Forwarded-Host / X-Forwarded-Proto so depart behind a
+    We honor X-Forwarded-Host / X-Forwarded-Proto so hafen behind a
     reverse proxy builds the right URL without the operator having to
     configure it separately."""
     scheme = request.headers.get("x-forwarded-proto") or request.url.scheme

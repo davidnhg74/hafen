@@ -23,9 +23,9 @@ Design:
 
 Key configuration:
 
-  * `DEPART_ENCRYPTION_KEY` — single base64 Fernet key (primary /
+  * `HAFEN_ENCRYPTION_KEY` — single base64 Fernet key (primary /
     write key).
-  * `DEPART_ENCRYPTION_KEYS` — comma-separated list of keys, newest
+  * `HAFEN_ENCRYPTION_KEYS` — comma-separated list of keys, newest
     first. Overrides the single-key var when present. Use for rotation.
 
 A missing key means encryption is disabled: new writes stay plaintext,
@@ -61,11 +61,11 @@ def _multifernet() -> Optional[MultiFernet]:
     key is configured. LRU-cached so we don't re-parse env on every
     read/write; the cache is process-scoped, so changing env vars
     requires a restart (matches how operators manage secrets)."""
-    keys_env = os.environ.get("DEPART_ENCRYPTION_KEYS")
+    keys_env = os.environ.get("HAFEN_ENCRYPTION_KEYS")
     if keys_env:
         raw_keys = [k.strip() for k in keys_env.split(",") if k.strip()]
     else:
-        single = os.environ.get("DEPART_ENCRYPTION_KEY")
+        single = os.environ.get("HAFEN_ENCRYPTION_KEY")
         raw_keys = [single.strip()] if single and single.strip() else []
 
     if not raw_keys:
@@ -75,7 +75,7 @@ def _multifernet() -> Optional[MultiFernet]:
         fernets = [Fernet(k) for k in raw_keys]
     except Exception as exc:  # noqa: BLE001 — bad key material
         logger.error(
-            "DEPART_ENCRYPTION_KEY(S) invalid (expected Fernet base64 keys): %s",
+            "HAFEN_ENCRYPTION_KEY(S) invalid (expected Fernet base64 keys): %s",
             exc,
         )
         return None
@@ -119,7 +119,7 @@ def decrypt(value: Optional[str]) -> Optional[str]:
 
     Raises RuntimeError on encrypted input when no key is configured
     — better to fail loudly than to silently drop the value. The
-    operator should either set DEPART_ENCRYPTION_KEY or restore their
+    operator should either set HAFEN_ENCRYPTION_KEY or restore their
     backup."""
     if value is None:
         return None
@@ -128,7 +128,7 @@ def decrypt(value: Optional[str]) -> Optional[str]:
     fernet = _multifernet()
     if fernet is None:
         raise RuntimeError(
-            "encrypted value found but DEPART_ENCRYPTION_KEY is not set — "
+            "encrypted value found but HAFEN_ENCRYPTION_KEY is not set — "
             "cannot decrypt. Configure the key and restart the app."
         )
     token = value[len(SENTINEL):]

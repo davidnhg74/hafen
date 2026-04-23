@@ -176,7 +176,7 @@ def verify_chain(db: Session) -> dict[str, Any]:
 
 
 def _client_ip(request: Request) -> Optional[str]:
-    """Best-effort client-IP extraction. If the operator puts depart
+    """Best-effort client-IP extraction. If the operator puts hafen
     behind a reverse proxy, `X-Forwarded-For` or `X-Real-IP` will
     carry the real address; fall back to the socket peer otherwise."""
     xff = request.headers.get("x-forwarded-for")

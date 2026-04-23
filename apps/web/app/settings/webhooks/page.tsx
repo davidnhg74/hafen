@@ -101,11 +101,11 @@ function WebhooksContent() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Webhooks</h1>
             <p className="mt-2 text-gray-600">
-              Get notified when migrations finish or fail. Depart signs
+              Get notified when migrations finish or fail. Hafen signs
               each request with HMAC-SHA256 using the secret you
               configure — subscribers validate via the{' '}
               <code className="rounded bg-gray-100 px-1">
-                X-Depart-Signature
+                X-Hafen-Signature
               </code>{' '}
               header.
             </p>
@@ -188,7 +188,7 @@ function UnlicensedNotice() {
         Webhooks require a Pro license
       </h2>
       <p className="mt-2 text-amber-800">
-        Upload a Depart license that includes the{' '}
+        Upload a Hafen license that includes the{' '}
         <code className="rounded bg-amber-100 px-1">webhooks</code>{' '}
         feature to enable this page.
       </p>
@@ -455,7 +455,7 @@ function EditorPanel({
             placeholder={
               existing?.secret_set
                 ? 'Stored. Leave blank to keep, or type to replace.'
-                : 'Optional — subscribers validate X-Depart-Signature with this key.'
+                : 'Optional — subscribers validate X-Hafen-Signature with this key.'
             }
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm"
           />

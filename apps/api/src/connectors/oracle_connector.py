@@ -199,7 +199,7 @@ class OracleConnector:
         """Test CREATE TABLE capability."""
         try:
             session = self.get_session()
-            table_name = "depart_test_migration_table"
+            table_name = "hafen_test_migration_table"
 
             # Create test table
             session.execute(
@@ -231,7 +231,7 @@ class OracleConnector:
         """Test INSERT capability."""
         try:
             session = self.get_session()
-            table_name = "depart_test_migration_table"
+            table_name = "hafen_test_migration_table"
 
             # Create table
             session.execute(

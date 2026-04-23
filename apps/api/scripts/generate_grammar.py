@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the ANTLR PL/SQL parser into src/source/oracle/_generated/.
 
-Caches antlr-4.13.2-complete.jar under ~/.cache/depart-grammar/. Requires a
+Caches antlr-4.13.2-complete.jar under ~/.cache/hafen-grammar/. Requires a
 Java runtime on PATH (the antlr tool is a JAR). On Mac: `brew install
 temurin`. On Debian/Ubuntu: `apt install default-jre-headless`.
 
@@ -21,7 +21,7 @@ from pathlib import Path
 
 ANTLR_VERSION = "4.13.2"
 ANTLR_JAR_URL = f"https://www.antlr.org/download/antlr-{ANTLR_VERSION}-complete.jar"
-CACHE_DIR = Path.home() / ".cache" / "depart-grammar"
+CACHE_DIR = Path.home() / ".cache" / "hafen-grammar"
 JAR_PATH = CACHE_DIR / f"antlr-{ANTLR_VERSION}-complete.jar"
 
 API_ROOT = Path(__file__).resolve().parents[1]

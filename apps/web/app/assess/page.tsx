@@ -3,7 +3,7 @@
 /**
  * /assess — public, no-auth, paste-DDL → complexity report.
  *
- * This is the top-of-funnel for depart.cloud. The whole design
+ * This is the top-of-funnel for hafen.ai. The whole design
  * optimizes for "time to insight < 5 seconds from landing page click."
  * EDB Migration Portal and Ispirer both gate this behind a signup;
  * we deliberately do not.

@@ -27,13 +27,13 @@ export default function CloudOnlyNotice({
             {page} isn&apos;t part of the self-hosted product.
           </h1>
           <p className="mt-4 text-gray-600">
-            This depart install is running in self-hosted mode. User
+            This hafen install is running in self-hosted mode. User
             accounts, billing, and support tickets all live on{' '}
             <a
-              href="https://depart.cloud"
+              href="https://hafen.ai"
               className="text-purple-600 underline"
             >
-              depart.cloud
+              hafen.ai
             </a>
             . Nothing in this local install phones home — including you.
           </p>

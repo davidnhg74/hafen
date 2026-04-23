@@ -12,7 +12,7 @@
  * so the first-visit UX shows real Tier B/C risk items instead of a
  * boring zero-risk assessment.
  */
-export const HR_SAMPLE = `-- depart — HR sample schema
+export const HR_SAMPLE = `-- hafen — HR sample schema
 -- Oracle DDL + PL/SQL. Paste your own to run an assessment on your schema.
 
 CREATE TABLE hr.departments (

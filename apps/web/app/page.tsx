@@ -1,5 +1,5 @@
 /**
- * depart.cloud landing page.
+ * hafen.ai landing page.
  *
  * The pitch in one scroll:
  *   Hero → Problem → Three Pillars → How It Works →
@@ -42,7 +42,7 @@ function Hero() {
             Oracle → Postgres migration that never leaves your network.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-purple-100 md:text-xl">
-            depart is a <strong>self-hosted</strong> migration platform. Download the Docker
+            hafen is a <strong>self-hosted</strong> migration platform. Download the Docker
             image, run it inside your VPC, point it at your Oracle and Postgres. Nothing phones
             home. AI conversion uses your own Anthropic API key.
           </p>
@@ -55,7 +55,7 @@ function Hero() {
               href="/download"
               className="rounded-lg bg-white px-8 py-4 font-bold text-purple-700 shadow-lg transition hover:bg-gray-100"
             >
-              Download depart →
+              Download hafen →
             </Link>
             <Link
               href="/assess"
@@ -184,7 +184,7 @@ function HowItWorks() {
           <Step
             n={2}
             title="Assess & plan"
-            body="Point depart at a read-only Oracle account. It introspects the schema, scores complexity, flags risky constructs (MERGE, CONNECT BY, autonomous txns), and generates a table-by-table load plan — parents first, cycles with deferred constraints, sequence catch-up, rollback points."
+            body="Point hafen at a read-only Oracle account. It introspects the schema, scores complexity, flags risky constructs (MERGE, CONNECT BY, autonomous txns), and generates a table-by-table load plan — parents first, cycles with deferred constraints, sequence catch-up, rollback points."
           />
           <Step
             n={3}
@@ -287,7 +287,7 @@ function Pricing() {
               'Merkle verification',
               'CLI, Docker image',
             ]}
-            cta={{ href: 'https://github.com/davidnhg74/depart', label: 'View on GitHub' }}
+            cta={{ href: 'https://github.com/davidnhg74/hafen', label: 'View on GitHub' }}
           />
           <PlanCard
             name="Community"
@@ -401,12 +401,12 @@ function Comparison() {
     { label: 'Target-neutral (any Postgres)', values: [true, true, 'EDB only', 'AWS only'] },
     { label: 'Transparent pricing', values: [true, 'free', 'free', 'AWS metering'] },
   ];
-  const cols = ['depart', 'Ora2Pg', 'EDB Portal', 'AWS SCT'];
+  const cols = ['hafen', 'Ora2Pg', 'EDB Portal', 'AWS SCT'];
   return (
     <section className="py-20">
       <div className="container mx-auto max-w-5xl px-4">
         <h2 className="text-center text-3xl font-bold text-gray-900 md:text-4xl">
-          How depart compares.
+          How hafen compares.
         </h2>
         <div className="mt-10 overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -465,14 +465,14 @@ function FAQ() {
     },
     {
       q: 'Do we need a new Postgres SKU from EDB?',
-      a: 'No. depart targets any Postgres 13+. Plain RDS, Aurora, CloudSQL, Crunchy, Supabase, self-hosted — all equivalent.',
+      a: 'No. hafen targets any Postgres 13+. Plain RDS, Aurora, CloudSQL, Crunchy, Supabase, self-hosted — all equivalent.',
     },
     {
       q: 'Is AI conversion actually safe for production code?',
       a: 'Every generated conversion is shown as a diff against the original with reasoning. You approve each change. Nothing runs unreviewed. The AI call goes from your server to Anthropic (or whichever provider you choose) using your API key — we are not in that path.',
     },
     {
-      q: 'Does depart phone home? Can it run fully air-gapped?',
+      q: 'Does hafen phone home? Can it run fully air-gapped?',
       a: 'No phone-home. The product image runs entirely inside your network; license verification is offline (signed JWT checked locally). Air-gap installs work — we ship a separate installer bundle with all dependencies vendored.',
     },
     {
@@ -481,7 +481,7 @@ function FAQ() {
     },
     {
       q: 'How does the license check work offline?',
-      a: 'When you buy a Pro license we send you a signed JWT with the project ID, seat count, and expiry. depart verifies the signature against our public key bundled with the image. No network call. If your license expires, AI conversion and PDF generation stop working — the OSS core (parser, runner) keeps running forever.',
+      a: 'When you buy a Pro license we send you a signed JWT with the project ID, seat count, and expiry. hafen verifies the signature against our public key bundled with the image. No network call. If your license expires, AI conversion and PDF generation stop working — the OSS core (parser, runner) keeps running forever.',
     },
     {
       q: 'Can we start with a free install and upgrade later?',
@@ -523,8 +523,8 @@ function FinalCTA() {
           Two commands. The whole platform runs on your laptop or a VM in your VPC.
         </p>
         <pre className="mx-auto mt-8 max-w-xl rounded-lg bg-black/30 p-4 text-left font-mono text-sm">
-{`git clone https://github.com/davidnhg74/depart
-cd depart && docker compose up`}
+{`git clone https://github.com/davidnhg74/hafen
+cd hafen && docker compose up`}
         </pre>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
@@ -576,12 +576,12 @@ function Footer() {
             <h4 className="mb-3 font-bold text-white">Open source</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="https://github.com/davidnhg74/depart" className="hover:text-white">
+                <a href="https://github.com/davidnhg74/hafen" className="hover:text-white">
                   GitHub
                 </a>
               </li>
               <li>
-                <a href="https://github.com/davidnhg74/depart/blob/main/CONTRIBUTING.md" className="hover:text-white">
+                <a href="https://github.com/davidnhg74/hafen/blob/main/CONTRIBUTING.md" className="hover:text-white">
                   Contribute
                 </a>
               </li>
@@ -614,9 +614,9 @@ function Footer() {
           </div>
         </div>
         <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm">
-          depart — open-source at{' '}
-          <a href="https://github.com/davidnhg74/depart" className="hover:text-white">
-            github.com/davidnhg74/depart
+          hafen — open-source at{' '}
+          <a href="https://github.com/davidnhg74/hafen" className="hover:text-white">
+            github.com/davidnhg74/hafen
           </a>
           . Built by a team that&apos;s done this migration before.
         </div>

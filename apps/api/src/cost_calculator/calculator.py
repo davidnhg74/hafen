@@ -54,7 +54,7 @@ class PostgresCostBreakdown(BaseModel):
 class MigrationCosts(BaseModel):
     """Migration-related costs (one-time)."""
 
-    depart_license_fee: float  # Depart migration service
+    hafen_license_fee: float  # Hafen migration service
     dba_consulting_hours: int
     dba_consulting_cost: float
     testing_and_validation: float
@@ -97,9 +97,9 @@ class CostCalculator:
     POSTGRES_SUPPORT_PERCENT = 0.05  # 5% of infrastructure (very cheap)
     POSTGRES_DBA_SALARY = 100_000  # per FTE per year (slightly less specialized)
 
-    # Depart pricing
-    DEPART_MIGRATION_FEE = 25_000  # one-time for first migration
-    DEPART_ADDITIONAL_DB_FEE = 8_000  # per additional database
+    # Hafen pricing
+    HAFEN_MIGRATION_FEE = 25_000  # one-time for first migration
+    HAFEN_ADDITIONAL_DB_FEE = 8_000  # per additional database
 
     # Consulting
     DBA_CONSULTING_RATE = 250  # per hour
@@ -188,7 +188,7 @@ class CostCalculator:
         # PostgreSQL license: FREE
         license_cost = 0
 
-        # Support: Depart + community (much cheaper)
+        # Support: Hafen + community (much cheaper)
         # For simplicity: flat $10K/year per database
         support_cost = 10_000 * self.num_databases
 
@@ -225,10 +225,10 @@ class CostCalculator:
 
     def calculate_migration_costs(self) -> MigrationCosts:
         """Calculate one-time migration costs."""
-        # Depart license fee
-        depart_fee = self.DEPART_MIGRATION_FEE
+        # Hafen license fee
+        hafen_fee = self.HAFEN_MIGRATION_FEE
         if self.num_databases > 1:
-            depart_fee += (self.num_databases - 1) * self.DEPART_ADDITIONAL_DB_FEE
+            hafen_fee += (self.num_databases - 1) * self.HAFEN_ADDITIONAL_DB_FEE
 
         # DBA consulting (varies by complexity)
         # Estimate: 40-100 hours per database
@@ -269,7 +269,7 @@ class CostCalculator:
         training_cost = 5_000
 
         total = (
-            depart_fee
+            hafen_fee
             + consulting_cost
             + testing_cost
             + migration_service
@@ -278,7 +278,7 @@ class CostCalculator:
         )
 
         return MigrationCosts(
-            depart_license_fee=depart_fee,
+            hafen_license_fee=hafen_fee,
             dba_consulting_hours=int(consulting_hours),
             dba_consulting_cost=consulting_cost,
             testing_and_validation=testing_cost,

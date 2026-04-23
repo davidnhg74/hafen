@@ -1,4 +1,4 @@
-# AI Tools & Services Analysis for Depart
+# AI Tools & Services Analysis for Hafen
 
 **Goal:** Identify tools that measurably improve migration velocity, correctness, or user confidence.
 
@@ -8,9 +8,9 @@
 
 ### 1. **RAG: Migration Pattern Knowledge Base** ⭐⭐⭐⭐⭐
 
-**What it is:** Retrieval-Augmented Generation with Depart's migration patterns
+**What it is:** Retrieval-Augmented Generation with Hafen's migration patterns
 
-**How it improves Depart:**
+**How it improves Hafen:**
 - Store successful conversions in vector DB (Pinecone, Weaviate, PostgreSQL pgvector)
 - When user uploads similar code, retrieve past successful conversions
 - Feed to Claude as context: "Here's how we converted SIMILAR code before"
@@ -54,7 +54,7 @@ Claude sees context: "For salary calculations, these 3 patterns work best"
 
 **What it is:** Custom LLM trained on successful migrations + oracle-to-postgres conversions
 
-**How it improves Depart:**
+**How it improves Hafen:**
 - Fine-tune Claude or open-source model (Llama-2, Mistral) on:
   - Real Oracle procedures + correct PostgreSQL outputs
   - Common failures + how to avoid them
@@ -98,7 +98,7 @@ Claude sees context: "For salary calculations, these 3 patterns work best"
 
 **What it is:** Parse Oracle procedures to find dependencies and impact scope
 
-**How it improves Depart:**
+**How it improves Hafen:**
 - Build dependency graph: "Procedure A calls B, B calls C"
 - When user uploads Procedure A, show:
   - "This calls 7 other procedures (3 converted, 4 not converted yet)"
@@ -110,7 +110,7 @@ Claude sees context: "For salary calculations, these 3 patterns work best"
 ```
 User uploads: emp_raise_salary_proc
 
-Depart analyzes and reports:
+Hafen analyzes and reports:
   ├─ Calls: calc_tax_proc (already converted ✓)
   ├─ Calls: audit_log_proc (NOT YET - manual rewrite needed)
   ├─ Updates: employees (15M rows) - needs validation
@@ -156,7 +156,7 @@ Migration report recommends:
 
 **What it is:** Vision model analyzes ER diagrams → generates DDL
 
-**How it improves Depart:**
+**How it improves Hafen:**
 - User uploads PNG/PDF of Oracle schema diagram
 - Claude Vision reads diagram → generates CREATE TABLE statements
 - Then passes to schemaconverter → PostgreSQL DDL
@@ -205,7 +205,7 @@ User saves hours of manual DDL entry
 
 **What it is:** User searches: "Find all procedures that update salary" → AI finds them
 
-**How it improves Depart:**
+**How it improves Hafen:**
 - Embed all procedures in uploaded package using OpenAI embeddings or Claude
 - User asks natural language questions
 - Find related procedures without keyword matching
@@ -215,7 +215,7 @@ User saves hours of manual DDL entry
 ```
 User searches: "procedures that deal with bonuses"
 
-Depart finds:
+Hafen finds:
   ├─ calc_bonus_proc (exact keyword match)
   ├─ apply_annual_raises_proc (mentions bonus in comments)
   ├─ salary_reconcile_proc (recalculates bonuses)
@@ -253,9 +253,9 @@ User gets holistic view of bonus-related code
 ### ❌ **AWS DMS / Azure DMS / GCP Database Migration Service**
 **Why not integrate?**
 - These are schema/data-only, not PL/SQL conversion
-- Depart's strength is PL/SQL → replacing them is harder
-- Better to position Depart as **complement** to DMS
-- Landing page: "Use DMS for schema/data, Depart for PL/SQL"
+- Hafen's strength is PL/SQL → replacing them is harder
+- Better to position Hafen as **complement** to DMS
+- Landing page: "Use DMS for schema/data, Hafen for PL/SQL"
 
 **Status:** Skip for now, consider as competitor analysis
 
@@ -264,7 +264,7 @@ User gets holistic view of bonus-related code
 ### ❌ **EDB Migration Portal**
 **Why not partner?**
 - EDB locks users into EDB Postgres Advanced Server
-- Depart wins by being **cloud-neutral**
+- Hafen wins by being **cloud-neutral**
 - Direct competitor on Tier B conversions
 - Better to compete on cost + accuracy + test harnesses
 
@@ -286,7 +286,7 @@ User gets holistic view of bonus-related code
 **Why stick with pgTAP?**
 - pgTAP is mature, battle-tested, TAP protocol standard
 - pg_taps is similar, no advantage
-- Depart's test generation is the differentiator, not the framework
+- Hafen's test generation is the differentiator, not the framework
 
 **Status:** Stay with pgTAP
 
@@ -330,7 +330,7 @@ User gets holistic view of bonus-related code
 
 ---
 
-## 🎯 Strategic AI Approach for Depart
+## 🎯 Strategic AI Approach for Hafen
 
 ### **Three-Layer AI Stack**
 1. **Deterministic layer** (80%): Rules, regex, AST parsing

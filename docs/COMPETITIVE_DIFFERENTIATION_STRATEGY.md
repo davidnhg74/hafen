@@ -1,6 +1,6 @@
-# Depart: Competitive Differentiation & Missing Features
+# Hafen: Competitive Differentiation & Missing Features
 
-**Strategic analysis of what makes Depart unique vs competitors, and what's missing.**
+**Strategic analysis of what makes Hafen unique vs competitors, and what's missing.**
 
 ---
 
@@ -19,7 +19,7 @@
 
 ---
 
-## ⭐ Depart's Current Unique Advantages
+## ⭐ Hafen's Current Unique Advantages
 
 ### ✅ Already Implemented
 
@@ -266,7 +266,7 @@ Claude analysis:
 
 #### 3. **Autonomous Migration (End-to-End)** ⭐⭐⭐⭐⭐
 
-**What:** User uploads schema → Depart handles everything
+**What:** User uploads schema → Hafen handles everything
 - Analyze complexity
 - Convert code
 - Plan migration
@@ -277,7 +277,7 @@ Claude analysis:
 **Why competitors can't do it:**
 - Requires confidence in conversion accuracy
 - Most tools require manual review
-- Depart's RAG gives 95%+ accuracy
+- Hafen's RAG gives 95%+ accuracy
 
 **Price impact:** +$30K/year (premium)  
 **Sales impact:** "Migration takes 2 hours, not 2 weeks"  
@@ -294,9 +294,9 @@ Your current Oracle spend: $500K/year
   ├─ Support: $100K
   ├─ Infrastructure: $100K
   
-With PostgreSQL + Depart:
+With PostgreSQL + Hafen:
   ├─ PostgreSQL license: $0
-  ├─ Support: $20K (Depart + community)
+  ├─ Support: $20K (Hafen + community)
   ├─ Infrastructure: $80K
   ├─ Migration cost: $15K (one-time)
   
@@ -330,7 +330,7 @@ ROI: -100% (pays for itself day 1)
 **Why competitors can't do it:**
 - Requires industry expertise
 - One-size-fits-all tools don't work
-- Depart can customize per industry
+- Hafen can customize per industry
 
 **Price impact:** +$15K/year (compliance tier)  
 **Sales impact:** "Migration approved by compliance"  
@@ -353,7 +353,7 @@ Risk level: CRITICAL (impacts 3 reports + external system)
 **Why competitors can't do it:**
 - Requires AST parsing + dependency analysis
 - Most tools don't build dependency graphs
-- Depart's analyzer already does this
+- Hafen's analyzer already does this
 
 **Price impact:** +$10K/year  
 **Sales impact:** "We know your migration risks"  
@@ -373,7 +373,7 @@ Risk level: CRITICAL (impacts 3 reports + external system)
 **Why competitors can't do it:**
 - AWS/Azure can (but locked in)
 - Open-source tools don't have UI
-- Depart can be vendor-neutral observer
+- Hafen can be vendor-neutral observer
 
 **Price impact:** +$5K/year  
 **Sales impact:** "See your database health 24/7"  
@@ -395,7 +395,7 @@ Output: PostgreSQL test data (10M rows) with same patterns
 **Why competitors can't do it:**
 - Requires statistical analysis
 - Privacy-preserving (no real data)
-- Depart's analyzer already understands data patterns
+- Hafen's analyzer already understands data patterns
 
 **Price impact:** +$8K/year  
 **Sales impact:** "Test migration before production"  
@@ -522,7 +522,7 @@ Hard but game-changing (6-8 weeks):
 
 ## 🏆 Competitive Moat
 
-By implementing these features, Depart becomes:
+By implementing these features, Hafen becomes:
 
 1. **Most complete migration tool** (covers 100% of migration lifecycle)
 2. **Most cost-transparent** (show exact ROI)

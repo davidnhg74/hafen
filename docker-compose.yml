@@ -1,11 +1,11 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: depart_postgres
+    container_name: hafen_postgres
     environment:
-      POSTGRES_DB: depart
-      POSTGRES_USER: depart_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-depart_secure_password}
+      POSTGRES_DB: hafen
+      POSTGRES_USER: hafen_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hafen_secure_password}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5432:5432"
@@ -13,39 +13,39 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./apps/api/migrations/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U depart_user -d depart"]
+      test: ["CMD-SHELL", "pg_isready -U hafen_user -d hafen"]
       interval: 5s
       timeout: 5s
       retries: 10
     networks:
-      - depart_network
+      - hafen_network
 
   # Queue broker for the arq migration worker. Lightweight — one key
   # per in-flight job plus a history list capped by arq. Sized for
   # laptop use; raise maxmemory for production.
   redis:
     image: redis:7-alpine
-    container_name: depart_redis
+    container_name: hafen_redis
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     networks:
-      - depart_network
+      - hafen_network
     restart: unless-stopped
 
   api:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
-    container_name: depart_api
+    container_name: hafen_api
     environment: &api_env
-      DATABASE_URL: postgresql+psycopg://depart_user:${DB_PASSWORD:-depart_secure_password}@postgres:5432/depart
+      DATABASE_URL: postgresql+psycopg://hafen_user:${DB_PASSWORD:-hafen_secure_password}@postgres:5432/hafen
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       # BYOK Anthropic key — optional. Can also be set at runtime from /settings/instance.
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # Column encryption — optional but strongly recommended. Generate
       # with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`
-      DEPART_ENCRYPTION_KEY: ${DEPART_ENCRYPTION_KEY:-}
+      HAFEN_ENCRYPTION_KEY: ${HAFEN_ENCRYPTION_KEY:-}
       # Cloud routes (auth/billing/support) default OFF for the self-hosted product.
-      # depart.cloud (the marketing/purchase site) flips this to true.
+      # hafen.ai (the marketing/purchase site) flips this to true.
       ENABLE_CLOUD_ROUTES: ${ENABLE_CLOUD_ROUTES:-false}
       # Remaining vars only matter when ENABLE_CLOUD_ROUTES=true.
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production-super-secret-key}
@@ -68,7 +68,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - depart_network
+      - hafen_network
     restart: unless-stopped
 
   # arq worker — runs migrations out-of-process so an API restart
@@ -78,21 +78,21 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
-    container_name: depart_worker
+    container_name: hafen_worker
     command: ["arq", "src.worker.WorkerSettings"]
     environment: *api_env
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - depart_network
+      - hafen_network
     restart: unless-stopped
 
   web:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
-    container_name: depart_web
+    container_name: hafen_web
     ports:
       - "3000:3000"
     environment:
@@ -100,7 +100,7 @@ services:
     depends_on:
       - api
     networks:
-      - depart_network
+      - hafen_network
     restart: unless-stopped
 
   # Oracle Free 23ai for integration tests / fixtures.
@@ -108,10 +108,10 @@ services:
   #   docker compose --profile oracle up -d
   oracle:
     image: gvenzl/oracle-free:23-slim-faststart
-    container_name: depart_oracle
+    container_name: hafen_oracle
     profiles: ["oracle"]
     environment:
-      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-depart_oracle_pw}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-hafen_oracle_pw}
       APP_USER: hr
       APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD:-hr_pw}
     ports:
@@ -129,7 +129,7 @@ services:
       retries: 30
       start_period: 60s
     networks:
-      - depart_network
+      - hafen_network
 
 volumes:
   postgres_data:
@@ -138,5 +138,5 @@ volumes:
     driver: local
 
 networks:
-  depart_network:
+  hafen_network:
     driver: bridge

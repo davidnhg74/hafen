@@ -1,6 +1,6 @@
 # Phase 3: Complete Enterprise Migration Strategy
 
-**Depart's end-to-end platform for Oracle → PostgreSQL migration with AI enhancement.**
+**Hafen's end-to-end platform for Oracle → PostgreSQL migration with AI enhancement.**
 
 Combines Phases 1 (analysis), Phase 2 (conversion), and Phase 3 (execution + validation).
 
@@ -43,20 +43,20 @@ PILLAR 3: EXECUTION (Phase 3 🚀 Now)
 ```
 User uploads Oracle package (DDL + PL/SQL)
   ↓
-Depart analyzer runs (Phase 1)
+Hafen analyzer runs (Phase 1)
   → Complexity score: 52 (Medium)
   → Effort estimate: 8 engineer-days
   → PDF report generated
   ↓
 User reviews report
-  → "This is complex, let's use Depart's converter + validation"
+  → "This is complex, let's use Hafen's converter + validation"
 ```
 
 **Day 3: Schema Conversion**
 ```
 User provides Oracle DDL
   ↓
-Depart SchemaConverter (Phase 2, deterministic)
+Hafen SchemaConverter (Phase 2, deterministic)
   → CREATE TABLE oracle_table → CREATE TABLE pg_table
   → Data types normalized (NUMBER→NUMERIC, etc.)
   → Constraints preserved (PK, FK, UNIQUE)
@@ -69,7 +69,7 @@ Results reviewed
 ```
 User provides Oracle procedures
   ↓
-Depart PlSqlConverter (Phase 2, hybrid)
+Hafen PlSqlConverter (Phase 2, hybrid)
   → Deterministic rules handle 80% (variable fixes, parameter modes)
   → Claude fallback for 20% (CONNECT BY, dynamic SQL)
   → RAG system retrieves similar past conversions (Phase 3.1)
@@ -116,7 +116,7 @@ Complete: 15.2 TB migrated, zero data loss ✅
 
 **Day 7-8: Validation**
 ```
-Depart runs validation suite (Phase 3, Integrity)
+Hafen runs validation suite (Phase 3, Integrity)
 
 Layer 1: Structural (schema exists)
   ✅ 127 tables, 1500 columns, 250 PKs, 180 FKs
@@ -153,7 +153,7 @@ Report: ✅ GO FOR CUTOVER (99.92% confidence)
 ```
 PostgreSQL running in parallel (read-only)
   ↓
-Depart runs performance benchmarks (Phase 3, Benchmarking)
+Hafen runs performance benchmarks (Phase 3, Benchmarking)
   ├─ Baseline: Compare Oracle vs PostgreSQL queries
   ├─ Workload: Generate realistic test traffic
   ├─ Plan analysis: Check execution plans for issues
@@ -198,7 +198,7 @@ ANALYSIS PHASE
 │ (DDL + PL/SQL + CLOB files)     │
 └────────────┬────────────────────┘
              ↓
-         Depart Phase 1
+         Hafen Phase 1
     ┌─────────────────────┐
     │ Complexity Scorer   │
     │ • Count constructs  │
@@ -366,7 +366,7 @@ ANALYSIS PHASE
 
 ## 💰 ROI Summary
 
-### For Depart (Revenue)
+### For Hafen (Revenue)
 ```
 Phase 3.1 (RAG): Done
   → Upsell: "RAG-enhanced conversions" (+$5K per deal)
@@ -386,8 +386,8 @@ Phase 3.3 (Fine-tuning): Month 3
 ### For Customers (Cost Savings)
 ```
 Traditional migration: 100 engineer-days × $1K/day = $100K
-Depart Phase 1-2: 20 engineer-days × $1K/day + Depart fee = $30K
-Depart Phase 3: 5 engineer-days × $1K/day + Depart fee = $10K
+Hafen Phase 1-2: 20 engineer-days × $1K/day + Hafen fee = $30K
+Hafen Phase 3: 5 engineer-days × $1K/day + Hafen fee = $10K
 
 Savings: $70K–90K per migration
 License cost: $5K–25K (easily justified)
@@ -473,7 +473,7 @@ License cost: $5K–25K (easily justified)
 
 ---
 
-## ✅ Depart Platform Status
+## ✅ Hafen Platform Status
 
 ```
 Phase 1: Complexity Analysis ✅ COMPLETE

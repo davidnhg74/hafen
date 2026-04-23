@@ -1,6 +1,6 @@
-# Depart — Migration Platform for Escaping Legacy Oracle Workloads
+# Hafen — Migration Platform for Escaping Legacy Oracle Workloads
 
-Depart helps enterprises migrate away from Oracle by converting PL/SQL packages, procedures, and triggers into idiomatic PostgreSQL — with AI-generated test harnesses that prove correctness.
+Hafen helps enterprises migrate away from Oracle by converting PL/SQL packages, procedures, and triggers into idiomatic PostgreSQL — with AI-generated test harnesses that prove correctness.
 
 **Phase 1 — Free Complexity Analyzer:** Upload a zip of Oracle DDL + PL/SQL, get a complexity score, effort estimate, and downloadable PDF report.
 
@@ -59,7 +59,7 @@ npm run dev
 ## Architecture
 
 ```
-depart/
+hafen/
 ├── apps/
 │   ├── api/              # FastAPI backend (Python 3.12)
 │   │   ├── src/
@@ -247,8 +247,8 @@ pytest-watch tests/
 
 ```bash
 # Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/depart_dev
-POSTGRES_PASSWORD=depart_dev_pw
+DATABASE_URL=postgresql://user:pass@localhost:5432/hafen_dev
+POSTGRES_PASSWORD=hafen_dev_pw
 
 # LLM (Phase 2)
 ANTHROPIC_API_KEY=sk-ant-...
@@ -268,8 +268,8 @@ API_PORT=8000
 
 ## Support
 
-- GitHub Issues: [Issues](https://github.com/yourname/depart/issues)
-- Email: support@depart.io (Phase 2+)
+- GitHub Issues: [Issues](https://github.com/yourname/hafen/issues)
+- Email: support@hafen.io (Phase 2+)
 
 ## Legal
 

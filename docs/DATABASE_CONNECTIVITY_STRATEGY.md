@@ -1,6 +1,6 @@
 # Database Connectivity & Credential Management
 
-**How Depart connects to user's Oracle and PostgreSQL databases.**
+**How Hafen connects to user's Oracle and PostgreSQL databases.**
 
 ---
 
@@ -8,8 +8,8 @@
 
 ### Overview
 
-Depart needs **secure, authenticated connections** to both user's Oracle and PostgreSQL databases. These connections are:
-- **User-provided** (not stored on Depart servers)
+Hafen needs **secure, authenticated connections** to both user's Oracle and PostgreSQL databases. These connections are:
+- **User-provided** (not stored on Hafen servers)
 - **Tested before use** (fail-fast on bad credentials)
 - **Pooled for efficiency** (connection pooling)
 - **Encrypted in transit** (TLS/SSL)
@@ -180,7 +180,7 @@ def migrate_sequence(oracle_session, postgres_session, seq_name: str):
 User provides:
 ├─ Host: postgres.company.com
 ├─ Port: 5432 (default)
-├─ Database: depart_migration
+├─ Database: hafen_migration
 ├─ Username: postgres
 └─ Password: [encrypted]
 ```
@@ -199,7 +199,7 @@ sqlalchemy>=2.0
 postgres_url = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{database}"
 
 # Example:
-# postgresql+psycopg://postgres:password@postgres.company.com:5432/depart_migration
+# postgresql+psycopg://postgres:password@postgres.company.com:5432/hafen_migration
 ```
 
 ### Connection Implementation
@@ -224,7 +224,7 @@ class PostgresConnector:
                 pool_pre_ping=True,
                 connect_args={
                     "connect_timeout": 30,
-                    "application_name": "depart_migration",
+                    "application_name": "hafen_migration",
                 }
             )
             
@@ -264,7 +264,7 @@ class PostgresConnector:
 ```bash
 # .env (local only, never commit)
 ORACLE_CONNECTION_STRING=oracle+oracledb://user:pass@host:1521/?service_name=ORCL
-POSTGRES_CONNECTION_STRING=postgresql+psycopg://user:pass@host:5432/depart
+POSTGRES_CONNECTION_STRING=postgresql+psycopg://user:pass@host:5432/hafen
 ```
 
 #### Option 2: AWS Secrets Manager (Production)
@@ -280,7 +280,7 @@ def get_oracle_credentials(secret_name: str) -> dict:
     return json.loads(response['SecretString'])
 
 # Usage
-creds = get_oracle_credentials('depart/oracle/production')
+creds = get_oracle_credentials('hafen/oracle/production')
 connection_string = f"oracle+oracledb://{creds['username']}:{creds['password']}@..."
 ```
 

@@ -35,18 +35,18 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_DB: depart
-          POSTGRES_USER: depart_user
-          POSTGRES_PASSWORD: depart_secure_password
+          POSTGRES_DB: hafen
+          POSTGRES_USER: hafen_user
+          POSTGRES_PASSWORD: hafen_secure_password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U depart_user -d depart"
+          --health-cmd "pg_isready -U hafen_user -d hafen"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql+psycopg://depart_user:depart_secure_password@localhost:5432/depart
+      DATABASE_URL: postgresql+psycopg://hafen_user:hafen_secure_password@localhost:5432/hafen
       ENVIRONMENT: test
     steps:
       - uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
           "
       - name: Bootstrap extensions
         run: |
-          PGPASSWORD=depart_secure_password psql -h localhost -U depart_user -d depart \
+          PGPASSWORD=hafen_secure_password psql -h localhost -U hafen_user -d hafen \
             -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pgcrypto;"
       - name: Migrate
         working-directory: apps/api

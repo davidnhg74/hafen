@@ -31,10 +31,10 @@ logger = logging.getLogger(__name__)
 
 # Short timeout — a slow subscriber must not keep the runner thread
 # busy. Retries are intentionally out of scope for v1; operators who
-# need durability can front Depart with a queue like Zapier or use
+# need durability can front Hafen with a queue like Zapier or use
 # the REST API to poll migration state.
 _DELIVERY_TIMEOUT_SECONDS = 5.0
-_USER_AGENT = "Depart-Webhook/1"
+_USER_AGENT = "Hafen-Webhook/1"
 
 # Bumped when the envelope shape changes. Subscribers switch on this
 # to stay compatible across upgrades. Added in v1 so we never ship a
@@ -204,14 +204,14 @@ def _deliver(
     headers = {
         "Content-Type": "application/json",
         "User-Agent": _USER_AGENT,
-        "X-Depart-Event": event,
-        "X-Depart-Delivery": delivery_id,
+        "X-Hafen-Event": event,
+        "X-Hafen-Delivery": delivery_id,
     }
     if ep.secret:
         sig = hmac.new(
             ep.secret.encode("utf-8"), body, hashlib.sha256
         ).hexdigest()
-        headers["X-Depart-Signature"] = f"sha256={sig}"
+        headers["X-Hafen-Signature"] = f"sha256={sig}"
 
     ep.last_triggered_at = utc_now()
     try:

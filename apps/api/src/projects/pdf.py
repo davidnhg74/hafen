@@ -49,7 +49,7 @@ def render(runbook: Runbook) -> bytes:
         topMargin=0.75 * inch,
         bottomMargin=0.75 * inch,
         title=f"Migration Runbook — {runbook.context.customer}",
-        author="Depart",
+        author="Hafen",
     )
     story = list(_build_story(runbook))
     doc.build(story, onFirstPage=_page_chrome, onLaterPages=_page_chrome)
@@ -231,7 +231,7 @@ def _page_chrome(canvas, doc):
     canvas.saveState()
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(HexColor("#757575"))
-    canvas.drawString(0.75 * inch, 0.5 * inch, "Depart Migration Runbook — Confidential")
+    canvas.drawString(0.75 * inch, 0.5 * inch, "Hafen Migration Runbook — Confidential")
     canvas.drawRightString(LETTER[0] - 0.75 * inch, 0.5 * inch, f"Page {doc.page}")
     canvas.restoreState()
 

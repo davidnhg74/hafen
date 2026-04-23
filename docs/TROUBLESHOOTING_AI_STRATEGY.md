@@ -1,4 +1,4 @@
-# Troubleshooting & Error Detection Strategy for Depart
+# Troubleshooting & Error Detection Strategy for Hafen
 
 **Goal:** Use AI to catch migration issues **before they become production disasters**.
 
@@ -861,7 +861,7 @@ Rollback decision: AUTOMATIC (go_threshold expired)
 
 ## 🚀 Enterprise Differentiator
 
-By Phase 3.3, Depart will offer:
+By Phase 3.3, Hafen will offer:
 
 ```
 Traditional Migration:
@@ -872,7 +872,7 @@ Traditional Migration:
   5. Monitor (watch for failures)
   Result: 6-8 weeks, multiple rollbacks, customer risk
 
-Depart AI Troubleshooting:
+Hafen AI Troubleshooting:
   1. Pre-flight checks (semantic errors, risk scores)
      → 70% of issues caught
   

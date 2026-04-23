@@ -2,7 +2,7 @@
 
   python -m src.migrate \
       --source 'oracle+oracledb://hr:hr@oracle:1521/?service_name=FREEPDB1' \
-      --target 'postgresql+psycopg://depart_user:depart_secure_password@localhost:5432/depart' \
+      --target 'postgresql+psycopg://hafen_user:hafen_secure_password@localhost:5432/hafen' \
       --source-schema HR \
       --target-schema public \
       [--tables EMPLOYEES,DEPARTMENTS]   # restrict to a subset

@@ -39,7 +39,7 @@ The Cost Savings Calculator is a complete feature for ROI justification. Users c
 ### Migration Costs (One-time)
 | Item | Formula |
 |------|---------|
-| Depart License | $25K + ($8K × additional DBs) |
+| Hafen License | $25K + ($8K × additional DBs) |
 | DBA Consulting | 40–150 hours × $250/hr |
 | Testing & Validation | $5K–$50K (size-dependent) |
 | Data Migration Service | $2K–$30K |
@@ -196,7 +196,7 @@ curl -X POST http://localhost:8000/api/v3/cost-analysis \
 
 ## File Structure
 ```
-depart/
+hafen/
 ├── apps/
 │   ├── api/src/
 │   │   └── cost_calculator/
@@ -229,7 +229,7 @@ To adjust pricing assumptions, edit `apps/api/src/cost_calculator/calculator.py`
 - `ORACLE_SUPPORT_PERCENT`: Support as percentage of license
 - `ORACLE_DBA_SALARY`: DBA salary benchmark
 - `AWS_DATABASE_MONTHLY`: Cloud infrastructure costs
-- `DEPART_MIGRATION_FEE`: Base migration cost
+- `HAFEN_MIGRATION_FEE`: Base migration cost
 - etc.
 
 All values are tunable constants at the top of the `CostCalculator` class.

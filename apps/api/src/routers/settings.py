@@ -42,7 +42,7 @@ class SettingsStatus(BaseModel):
 
     `encryption_key_configured` tells the UI whether sensitive columns
     are being encrypted at rest. When false, the UI surfaces a warning
-    pointing the operator at DEPART_ENCRYPTION_KEY."""
+    pointing the operator at HAFEN_ENCRYPTION_KEY."""
 
     anthropic_key_masked: Optional[str]
     anthropic_key_configured: bool
@@ -109,7 +109,7 @@ def rotate_encryption_key(
 
     Operators rotate keys by:
       1. Generate a fresh Fernet key.
-      2. Prepend it to DEPART_ENCRYPTION_KEYS (old key(s) stay in the
+      2. Prepend it to HAFEN_ENCRYPTION_KEYS (old key(s) stay in the
          list so we can still decrypt existing rows during rollover).
       3. Restart the API so the env reload picks up the new key.
       4. Call this endpoint to re-encrypt every stored value with the
@@ -128,7 +128,7 @@ def rotate_encryption_key(
         raise HTTPException(
             status_code=400,
             detail=(
-                "DEPART_ENCRYPTION_KEY is not configured. Set the env var "
+                "HAFEN_ENCRYPTION_KEY is not configured. Set the env var "
                 "and restart the API before rotating."
             ),
         )

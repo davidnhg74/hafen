@@ -6,7 +6,7 @@ that the application now writes ciphertext through `EncryptedText`
 decrypt step.
 
 This migration walks the existing rows and re-writes each sensitive
-value through the encryption layer *if* DEPART_ENCRYPTION_KEY is
+value through the encryption layer *if* HAFEN_ENCRYPTION_KEY is
 configured at migration time. If no key is configured, the migration
 is a no-op — future writes will be plaintext until the operator sets
 a key and re-runs via the admin rotation endpoint.

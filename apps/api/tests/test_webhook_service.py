@@ -75,12 +75,12 @@ def test_fire_event_delivers_to_subscribed_endpoint(db):
     assert envelope["schema_version"] == webhook_service.PAYLOAD_SCHEMA_VERSION
     assert envelope["event"] == "migration.completed"
     assert envelope["data"]["migration_id"] == "m-1"
-    assert req.headers["x-depart-event"] == "migration.completed"
-    assert "x-depart-delivery" in req.headers
+    assert req.headers["x-hafen-event"] == "migration.completed"
+    assert "x-hafen-delivery" in req.headers
 
     # HMAC matches what a receiver computes over the exact bytes.
     expected = hmac.new(b"s3cret", req.content, hashlib.sha256).hexdigest()
-    assert req.headers["x-depart-signature"] == f"sha256={expected}"
+    assert req.headers["x-hafen-signature"] == f"sha256={expected}"
 
     db.refresh(ep)
     assert ep.last_status == 200
@@ -236,7 +236,7 @@ def test_no_signature_header_when_secret_absent(db):
     )
     client.close()
 
-    assert "x-depart-signature" not in captured[0].headers
+    assert "x-hafen-signature" not in captured[0].headers
 
 
 def test_deliver_to_endpoint_bypasses_subscription(db):

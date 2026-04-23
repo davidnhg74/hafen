@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Build an air-gapped installer bundle for depart.
+# Build an air-gapped installer bundle for hafen.
 #
 # Produces a single tarball the operator copies to the target host,
 # extracts, and runs — no internet access required at install time.
 # Contents:
 #
-#   depart-airgap/
+#   hafen-airgap/
 #     README.md                 — step-by-step install + first-migration guide
 #     docker-compose.yml        — the self-hosted stack
 #     images/
 #       postgres.tar            — pgvector/pgvector:pg16
-#       api.tar                 — depart-api:<tag>
-#       web.tar                 — depart-web:<tag>
+#       api.tar                 — hafen-api:<tag>
+#       web.tar                 — hafen-web:<tag>
 #     install.sh                — loads images, brings the stack up, sanity-checks
 #     uninstall.sh              — brings the stack down, removes images
 #     fixtures/
@@ -31,12 +31,12 @@ set -euo pipefail
 
 TAG="${TAG:-airgap-$(date -u +%Y%m%d)}"
 OUTPUT_DIR="${OUTPUT_DIR:-$(pwd)/dist}"
-BUNDLE_NAME="depart-airgap-${TAG}"
+BUNDLE_NAME="hafen-airgap-${TAG}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --tag) TAG="$2"; BUNDLE_NAME="depart-airgap-${TAG}"; shift 2 ;;
+        --tag) TAG="$2"; BUNDLE_NAME="hafen-airgap-${TAG}"; shift 2 ;;
         --output) OUTPUT_DIR="$2"; shift 2 ;;
         -h|--help)
             grep '^#' "$0" | sed 's/^# \{0,1\}//'
@@ -54,11 +54,11 @@ mkdir -p "${STAGING}/images"
 
 # ─── 1. Build the API + web images ─────────────────────────────────────────
 
-echo "→ building depart-api image..."
-docker build -t "depart-api:${TAG}" "${REPO_ROOT}/apps/api"
+echo "→ building hafen-api image..."
+docker build -t "hafen-api:${TAG}" "${REPO_ROOT}/apps/api"
 
-echo "→ building depart-web image..."
-docker build -t "depart-web:${TAG}" "${REPO_ROOT}/apps/web"
+echo "→ building hafen-web image..."
+docker build -t "hafen-web:${TAG}" "${REPO_ROOT}/apps/web"
 
 # ─── 2. Pull the third-party images we depend on ──────────────────────────
 
@@ -69,8 +69,8 @@ docker pull pgvector/pgvector:pg16
 
 echo "→ exporting images to tarballs..."
 docker save -o "${STAGING}/images/postgres.tar" pgvector/pgvector:pg16
-docker save -o "${STAGING}/images/api.tar" "depart-api:${TAG}"
-docker save -o "${STAGING}/images/web.tar" "depart-web:${TAG}"
+docker save -o "${STAGING}/images/api.tar" "hafen-api:${TAG}"
+docker save -o "${STAGING}/images/web.tar" "hafen-web:${TAG}"
 
 # ─── 4. Copy compose + fixtures ───────────────────────────────────────────
 
@@ -78,34 +78,34 @@ echo "→ copying compose + fixtures + readme..."
 # Generate an air-gap-flavored compose that references the :local tag
 # we load on the target, not the upstream Docker Hub names.
 cat > "${STAGING}/docker-compose.yml" <<EOF
-# depart — air-gap compose. All image tags resolve to images you load
+# hafen — air-gap compose. All image tags resolve to images you load
 # from ./images/*.tar via install.sh — no registry pulls at runtime.
 
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: depart_postgres
+    container_name: hafen_postgres
     environment:
-      POSTGRES_DB: depart
-      POSTGRES_USER: depart_user
-      POSTGRES_PASSWORD: \${DB_PASSWORD:-depart_secure_password}
+      POSTGRES_DB: hafen
+      POSTGRES_USER: hafen_user
+      POSTGRES_PASSWORD: \${DB_PASSWORD:-hafen_secure_password}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U depart_user -d depart"]
+      test: ["CMD-SHELL", "pg_isready -U hafen_user -d hafen"]
       interval: 5s
       timeout: 5s
       retries: 10
-    networks: [depart_network]
+    networks: [hafen_network]
 
   api:
-    image: depart-api:${TAG}
-    container_name: depart_api
+    image: hafen-api:${TAG}
+    container_name: hafen_api
     environment:
-      DATABASE_URL: postgresql+psycopg://depart_user:\${DB_PASSWORD:-depart_secure_password}@postgres:5432/depart
+      DATABASE_URL: postgresql+psycopg://hafen_user:\${DB_PASSWORD:-hafen_secure_password}@postgres:5432/hafen
       ENABLE_CLOUD_ROUTES: "false"
       ANTHROPIC_API_KEY: \${ANTHROPIC_API_KEY:-}
       ENVIRONMENT: production
@@ -114,30 +114,30 @@ services:
     ports: ["8000:8000"]
     depends_on:
       postgres: { condition: service_healthy }
-    networks: [depart_network]
+    networks: [hafen_network]
     restart: unless-stopped
 
   web:
-    image: depart-web:${TAG}
-    container_name: depart_web
+    image: hafen-web:${TAG}
+    container_name: hafen_web
     ports: ["3000:3000"]
     environment:
       NEXT_PUBLIC_API_URL: \${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     depends_on: [api]
-    networks: [depart_network]
+    networks: [hafen_network]
     restart: unless-stopped
 
 volumes:
   postgres_data:
 
 networks:
-  depart_network:
+  hafen_network:
 EOF
 
 cp -R "${REPO_ROOT}/docker/oracle-init" "${STAGING}/fixtures/oracle-init" 2>/dev/null || true
 
 cat > "${STAGING}/.env.example" <<'EOF'
-# depart air-gap config. Copy to `.env` and fill in.
+# hafen air-gap config. Copy to `.env` and fill in.
 #
 # DB_PASSWORD:         any strong password; only used internally.
 # ANTHROPIC_API_KEY:   optional. Needed for live AI conversion. Can also
@@ -194,8 +194,8 @@ echo "→ stopping the stack..."
 docker compose down
 
 echo "→ removing images..."
-docker image rm -f pgvector/pgvector:pg16 depart-api:$(grep -oP 'depart-api:\K[^ ]+' docker-compose.yml | head -1) depart-web:$(grep -oP 'depart-web:\K[^ ]+' docker-compose.yml | head -1) 2>/dev/null || true
-echo "→ done. Postgres volume (depart_postgres_data) left in place — remove it manually if you want a clean slate."
+docker image rm -f pgvector/pgvector:pg16 hafen-api:$(grep -oP 'hafen-api:\K[^ ]+' docker-compose.yml | head -1) hafen-web:$(grep -oP 'hafen-web:\K[^ ]+' docker-compose.yml | head -1) 2>/dev/null || true
+echo "→ done. Postgres volume (hafen_postgres_data) left in place — remove it manually if you want a clean slate."
 EOF
 
 chmod +x "${STAGING}/install.sh" "${STAGING}/uninstall.sh"
@@ -203,7 +203,7 @@ chmod +x "${STAGING}/install.sh" "${STAGING}/uninstall.sh"
 # ─── 6. README ────────────────────────────────────────────────────────────
 
 cat > "${STAGING}/README.md" <<EOF
-# depart — air-gap install bundle (${TAG})
+# hafen — air-gap install bundle (${TAG})
 
 Everything in this tarball is self-contained. No internet access needed
 on the target host after extraction.
@@ -217,8 +217,8 @@ on the target host after extraction.
 ## Install
 
 \`\`\`bash
-tar -xzf depart-airgap-${TAG}.tar.gz
-cd depart-airgap-${TAG}
+tar -xzf hafen-airgap-${TAG}.tar.gz
+cd hafen-airgap-${TAG}
 cp .env.example .env      # optional: edit to customize passwords
 ./install.sh
 \`\`\`
@@ -240,12 +240,12 @@ Oracle → Postgres conversion samples.
 \`\`\`
 
 This stops the stack and removes the loaded images. The Postgres
-volume is left in place; remove it with \`docker volume rm depart_postgres_data\`
+volume is left in place; remove it with \`docker volume rm hafen_postgres_data\`
 if you want a clean slate.
 
 ## Support
 
-Enterprise license holders: email <support@depart.io> with the project
+Enterprise license holders: email <support@hafen.io> with the project
 and license subject shown at **Settings → Instance settings**. We
 respond within SLA even for air-gapped deployments (send us the
 runbook PDF or logs out-of-band).

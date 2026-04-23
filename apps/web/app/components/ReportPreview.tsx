@@ -232,7 +232,7 @@ export default function ReportPreview({ jobId, onBack }: ReportPreviewProps) {
           </button>
           <a
             href={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/report/${jobId}/pdf`}
-            download={`depart_analysis_${jobId}.pdf`}
+            download={`hafen_analysis_${jobId}.pdf`}
             className="block w-full bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-medium text-center"
           >
             Download Full PDF Report

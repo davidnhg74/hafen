@@ -58,7 +58,7 @@ def pro_license(reset_license):
     now = int(time.time())
     token = jwt.encode(
         {
-            "sub": "tests@depart",
+            "sub": "tests@hafen",
             "project": "runbook-tests",
             "tier": "pro",
             "features": ["ai_conversion", "runbook_pdf"],

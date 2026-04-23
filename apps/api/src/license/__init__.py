@@ -1,7 +1,7 @@
-"""Offline license verification for self-hosted depart.
+"""Offline license verification for self-hosted hafen.
 
 No network calls. No phone-home. The product image ships with the
-public half of depart's license-signing keypair (at
+public half of hafen's license-signing keypair (at
 `public_key.pem` alongside this module) and verifies any license JWT
 the operator uploads against it.
 

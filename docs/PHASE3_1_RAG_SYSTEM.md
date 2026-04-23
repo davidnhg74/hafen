@@ -210,7 +210,7 @@ pydantic-email>=2.0.0             # Fix EmailStr import
    - Suggest priority patterns for fine-tuning
 
 4. **Vector similarity fine-tuning** (optional, Phase 3.3)
-   - After 50+ cases, fine-tune embedding model on Depart-specific code
+   - After 50+ cases, fine-tune embedding model on Hafen-specific code
    - Could improve similarity matching by 10-15%
 
 ---

@@ -126,7 +126,7 @@ function RunbookContent() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `runbook-${customer.replace(/\s+/g, '_') || 'depart'}.pdf`;
+        a.download = `runbook-${customer.replace(/\s+/g, '_') || 'hafen'}.pdf`;
         document.body.appendChild(a);
         a.click();
         a.remove();

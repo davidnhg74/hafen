@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Depart with Docker Compose..."
+echo "🚀 Starting Hafen with Docker Compose..."
 echo ""
 
 # Check if docker-compose is available
@@ -23,12 +23,12 @@ echo ""
 docker-compose up
 
 echo ""
-echo "✅ Depart is running!"
+echo "✅ Hafen is running!"
 echo ""
 echo "Available at:"
 echo "  • Web:  http://localhost:3000"
 echo "  • API:  http://localhost:8000"
 echo "  • Docs: http://localhost:8000/docs"
-echo "  • DB:   localhost:5432 (depart / depart_dev_pw)"
+echo "  • DB:   localhost:5432 (hafen / hafen_dev_pw)"
 echo ""
 echo "To stop: Press Ctrl+C or run 'docker-compose down'"

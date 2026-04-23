@@ -1,4 +1,4 @@
-# Depart Platform - Quick Start Guide
+# Hafen Platform - Quick Start Guide
 
 ## Status
 - ✅ All phases complete (Phases 1-3)

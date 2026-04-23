@@ -9,7 +9,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Agreement to Terms</h2>
             <p>
-              By accessing and using Depart's website and services, you accept and agree to be bound by the terms and provision
+              By accessing and using Hafen's website and services, you accept and agree to be bound by the terms and provision
               of this agreement. If you do not agree to abide by the above, please do not use this service.
             </p>
           </section>
@@ -17,7 +17,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Service Description</h2>
             <p>
-              Depart provides an AI-powered platform for analyzing Oracle databases and converting PL/SQL code to PostgreSQL.
+              Hafen provides an AI-powered platform for analyzing Oracle databases and converting PL/SQL code to PostgreSQL.
               Services are provided "as is" and "as available."
             </p>
           </section>
@@ -81,7 +81,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Intellectual Property</h2>
             <p>
-              Depart's platform, including all software, designs, and code, is owned by Depart and protected by copyright and
+              Hafen's platform, including all software, designs, and code, is owned by Hafen and protected by copyright and
               intellectual property laws. You may not copy, modify, or redistribute our platform without permission.
             </p>
             <p className="mt-4">
@@ -109,7 +109,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by law, Depart is not liable for indirect, incidental, special, or consequential
+              To the maximum extent permitted by law, Hafen is not liable for indirect, incidental, special, or consequential
               damages arising from your use of or inability to use the service, including lost profits, data loss, or business
               interruption.
             </p>
@@ -133,7 +133,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Indemnification</h2>
             <p>
-              You agree to indemnify and hold harmless Depart, its officers, and employees from any claims, damages, or costs
+              You agree to indemnify and hold harmless Hafen, its officers, and employees from any claims, damages, or costs
               arising from your violation of these terms or misuse of the service.
             </p>
           </section>
@@ -150,8 +150,8 @@ export default function TermsPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Contact</h2>
             <p>
               For questions about these terms, contact us at{' '}
-              <a href="mailto:legal@depart.io" className="text-purple-600 hover:text-purple-700">
-                legal@depart.io
+              <a href="mailto:legal@hafen.io" className="text-purple-600 hover:text-purple-700">
+                legal@hafen.io
               </a>
             </p>
           </section>

@@ -91,7 +91,7 @@ function NewMigrationContent() {
 
         <h1 className="text-3xl font-bold text-gray-900">New migration</h1>
         <p className="mt-2 text-gray-600">
-          depart introspects the source, plans load order, and streams rows
+          hafen introspects the source, plans load order, and streams rows
           into the target with Merkle verification. You can edit everything
           below until you click <strong>Run</strong> on the next screen.
         </p>

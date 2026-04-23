@@ -9,7 +9,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
             <p>
-              Depart ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how
+              Hafen ("we," "us," "our," or "Company") is committed to protecting your privacy. This Privacy Policy explains how
               we collect, use, disclose, and safeguard your information when you visit our website and use our services.
             </p>
           </section>
@@ -96,8 +96,8 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Contact Us</h2>
             <p>
               For privacy questions or to exercise your rights, email us at{' '}
-              <a href="mailto:privacy@depart.io" className="text-purple-600 hover:text-purple-700">
-                privacy@depart.io
+              <a href="mailto:privacy@hafen.io" className="text-purple-600 hover:text-purple-700">
+                privacy@hafen.io
               </a>
             </p>
           </section>

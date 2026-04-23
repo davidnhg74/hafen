@@ -3,8 +3,8 @@
 A fresh `docker compose up` has no users. Before anyone can log in we
 need exactly one admin. Two ways to create that admin:
 
-  1. **Env-driven auto-bootstrap.** If DEPART_ADMIN_EMAIL and
-     DEPART_ADMIN_PASSWORD are set when the app starts AND no users
+  1. **Env-driven auto-bootstrap.** If HAFEN_ADMIN_EMAIL and
+     HAFEN_ADMIN_PASSWORD are set when the app starts AND no users
      exist, we silently create the admin. Good for scripted / CI /
      air-gapped installs.
 
@@ -108,13 +108,13 @@ def bootstrap(
 
 
 def maybe_bootstrap_from_env(db: Session) -> None:
-    """Called from main.py's startup event. If DEPART_ADMIN_EMAIL and
-    DEPART_ADMIN_PASSWORD are set AND no admin exists yet, create one.
+    """Called from main.py's startup event. If HAFEN_ADMIN_EMAIL and
+    HAFEN_ADMIN_PASSWORD are set AND no admin exists yet, create one.
     Silent success + silent skip — only fail if creation itself errors."""
     import os
 
-    email = os.environ.get("DEPART_ADMIN_EMAIL")
-    password = os.environ.get("DEPART_ADMIN_PASSWORD")
+    email = os.environ.get("HAFEN_ADMIN_EMAIL")
+    password = os.environ.get("HAFEN_ADMIN_PASSWORD")
     if not email or not password:
         return
 
@@ -124,7 +124,7 @@ def maybe_bootstrap_from_env(db: Session) -> None:
     now = utc_now()
     admin = User(
         email=email,
-        full_name=os.environ.get("DEPART_ADMIN_NAME"),
+        full_name=os.environ.get("HAFEN_ADMIN_NAME"),
         hashed_password=hash_password(password),
         role=UserRole.ADMIN,
         email_verified=True,
@@ -134,4 +134,4 @@ def maybe_bootstrap_from_env(db: Session) -> None:
     )
     db.add(admin)
     db.commit()
-    logger.info("auto-bootstrapped admin %s from DEPART_ADMIN_* env vars", email)
+    logger.info("auto-bootstrapped admin %s from HAFEN_ADMIN_* env vars", email)

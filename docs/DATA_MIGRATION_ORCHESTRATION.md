@@ -1,4 +1,4 @@
-# Data Migration Orchestration & Resilience Strategy for Depart
+# Data Migration Orchestration & Resilience Strategy for Hafen
 
 **Focus:** Moving terabytes of Oracle data to PostgreSQL efficiently, with automatic recovery and repeatability guarantees.
 
@@ -23,7 +23,7 @@
 4. Hope data matches (no validation until production)
 ```
 
-### Depart's AI-Powered Approach
+### Hafen's AI-Powered Approach
 ```
 1. Smart chunking: Partition data by size + dependencies
 2. Parallel transfer: Multiple streams with backpressure
@@ -41,7 +41,7 @@
 
 **What it is:** AWS's ETL orchestrator + Claude for intelligent migration planning
 
-**How it helps Depart:**
+**How it helps Hafen:**
 - Glue discovers source schema, generates Spark jobs for parallel transfer
 - Claude analyzes job logs, detects bottlenecks, recommends partitioning strategy
 - Automatic retry with exponential backoff + circuit breaker pattern
@@ -66,24 +66,24 @@ Real-time: Dashboard shows 12 GB/min, ETA 4 min, 3 retries so far
 Automatic: Every 10% checkpoint validated (row counts, checksums)
 ```
 
-**Implementation in Depart:**
+**Implementation in Hafen:**
 1. Add AWS Glue job template to Phase 3.2
 2. Claude analyzes schema → generates PySpark migration code
-3. Depart UI: "Start migration" → Glue runs with streaming logs
+3. Hafen UI: "Start migration" → Glue runs with streaming logs
 4. On error: Auto-rollback to last checkpoint, notify user
 
 **Cost:** $0.44 DPU/hr, typically $20–100 per migration  
 **ROI:** Handles terabytes, automatic parallelization, built-in checkpoints  
-**Recommended:** ✅ **Phase 3.2** (for AWS-hosted Depart SaaS)
+**Recommended:** ✅ **Phase 3.2** (for AWS-hosted Hafen SaaS)
 
 ---
 
 ### 2. **Custom Python Migrator + Claude Planning** ⭐⭐⭐⭐
 
-**What it is:** Depart builds a smart migration orchestrator using Claude for strategy
+**What it is:** Hafen builds a smart migration orchestrator using Claude for strategy
 
 **How it helps:**
-- Depart analyzes Oracle schema, generates migration plan with Claude
+- Hafen analyzes Oracle schema, generates migration plan with Claude
 - Custom Python orchestrator transfers data in chunks, validates continuously
 - Claude monitors logs, detects stalls, recommends remediation
 - Works on-prem, hybrid, or any cloud
@@ -231,7 +231,7 @@ class MigrationGuardian:
 
 **Cost:** Free (use existing infra)  
 **ROI:** Full control, works anywhere, no vendor lock-in  
-**Recommended:** ✅ **Phase 3.2+** (core offering for Depart Enterprise)
+**Recommended:** ✅ **Phase 3.2+** (core offering for Hafen Enterprise)
 
 ---
 
@@ -300,12 +300,12 @@ dbt runs:
 
 ---
 
-## 📊 Recommended Architecture for Depart
+## 📊 Recommended Architecture for Hafen
 
 ### Three-Tier Migration System
 
 ```
-Tier 1: Schema (Depart's deterministic converters)
+Tier 1: Schema (Hafen's deterministic converters)
   → Phase 2: DDL conversion (tables, indexes, constraints)
   → Validation: Constraints load without error ✓
 
@@ -315,7 +315,7 @@ Tier 2: Data Movement (This section)
   → Continuous validation (row counts, checksums)
   → Automatic rollback on errors
 
-Tier 3: Logic (Depart's PL/SQL converters)
+Tier 3: Logic (Hafen's PL/SQL converters)
   → Phase 2: Procedure/function conversion
   → Phase 3.2: pgTAP tests validate converted code
   → Data comparison: Oracle vs. PostgreSQL results match
@@ -326,7 +326,7 @@ Tier 3: Logic (Depart's PL/SQL converters)
 **Phase 3.2 (Weeks 1-2): Data Orchestrator**
 - [ ] Build DataMigrator class with chunking + checkpoints
 - [ ] Implement validation engine (row counts, checksums)
-- [ ] Add CLI: `depart migrate --plan` → shows strategy, duration estimate
+- [ ] Add CLI: `hafen migrate --plan` → shows strategy, duration estimate
 - [ ] Test on sample dataset (1 GB → 100 GB)
 
 **Phase 3.2 (Weeks 3-4): Claude Integration**
@@ -374,11 +374,11 @@ Tier 3: Logic (Depart's PL/SQL converters)
 | Approach | One-Time | Per TB | Parallelism | Rollback | Control |
 |----------|----------|--------|------------|----------|---------|
 | AWS DMS | $0 | $200–500 | Good | Poor | Limited |
-| Depart Custom | 1 week | $50–100 | Excellent | Automatic | Full |
+| Hafen Custom | 1 week | $50–100 | Excellent | Automatic | Full |
 | dbt | 1 week | $0 | Good | Okay | Good |
 | Glue | 3 days | $50–100 | Excellent | Automatic | Good |
 
-**Recommended:** Depart Custom (Phase 3.2) + Glue (Phase 3.3 for SaaS)
+**Recommended:** Hafen Custom (Phase 3.2) + Glue (Phase 3.3 for SaaS)
 
 ---
 

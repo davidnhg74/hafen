@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the OSS subset of depart into a standalone public repo.
+"""Extract the OSS subset of hafen into a standalone public repo.
 
 Writes a clean copy of the parser + runner + analyzer + CLI (everything
 MIT-licensable) to a destination directory. Everything AI/billing/auth/
@@ -10,21 +10,21 @@ doesn't push, doesn't publish to PyPI, and doesn't touch the working
 tree. It just materializes a directory you can `cd` into and `git init`.
 
 Usage:
-    scripts/extract-oss.py [--out /tmp/depart-public]
+    scripts/extract-oss.py [--out /tmp/hafen-public]
 
 The extracted layout matches what the GitHub repo will look like:
 
-    depart/
+    hafen/
       README.md                 ← written here
       LICENSE                   ← MIT, written here
       CONTRIBUTING.md           ← written here
       ARCHITECTURE.md           ← written here
       pyproject.toml            ← derived from the monorepo pyproject
       crates/
-        depart-parser/          ← src/core + src/source
-        depart-migrate/         ← src/migrate + src/target
-        depart-analyze/         ← src/analyze (complexity scorer + extractor)
-        depart-cli/             ← src/migrate/__main__.py wrapper
+        hafen-parser/          ← src/core + src/source
+        hafen-migrate/         ← src/migrate + src/target
+        hafen-analyze/         ← src/analyze (complexity scorer + extractor)
+        hafen-cli/             ← src/migrate/__main__.py wrapper
       docker/
         runner/                 ← minimal Dockerfile for the CLI
         oracle-init/            ← HR fixture
@@ -55,17 +55,17 @@ API_TESTS = REPO_ROOT / "apps" / "api" / "tests"
 # kept exclusively in the private repo.
 
 PACKAGES = {
-    "depart-parser": [
+    "hafen-parser": [
         (API_SRC / "core", "src/parser/core"),
         (API_SRC / "source", "src/parser/source"),
         (API_SRC / "validators", "src/parser/validators"),
     ],
-    "depart-migrate": [
+    "hafen-migrate": [
         (API_SRC / "migrate", "src/migrate"),
         (API_SRC / "target", "src/target"),
         (API_SRC / "infra", "src/infra"),
     ],
-    "depart-analyze": [
+    "hafen-analyze": [
         (API_SRC / "analyze", "src/analyze"),
     ],
 }
@@ -101,7 +101,7 @@ LICENSE = dedent(
     """\
     MIT License
 
-    Copyright (c) 2026 depart contributors
+    Copyright (c) 2026 hafen contributors
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -125,7 +125,7 @@ LICENSE = dedent(
 
 README = dedent(
     """\
-    # depart
+    # hafen
 
     Oracle → PostgreSQL migration, built for teams that want to own their tools.
 
@@ -135,26 +135,26 @@ README = dedent(
     - **Zero phone-home** — everything runs inside your infrastructure
 
     The enterprise edition (AI conversion, runbook PDF generator, hybrid control plane, SSO)
-    lives at <https://depart.cloud>. This repository is the MIT-licensed core.
+    lives at <https://hafen.ai>. This repository is the MIT-licensed core.
 
     ## Install
 
     ```bash
-    pip install depart-parser depart-migrate depart-analyze depart-cli
+    pip install hafen-parser hafen-migrate hafen-analyze hafen-cli
     ```
 
     Or run the Docker image:
 
     ```bash
-    docker run --rm ghcr.io/davidnhg74/depart:latest --help
+    docker run --rm ghcr.io/davidnhg74/hafen:latest --help
     ```
 
     ## Quickstart
 
     ```bash
-    depart migrate \\
+    hafen migrate \\
         --source 'oracle+oracledb://hr:hr@oracle:1521/?service_name=FREEPDB1' \\
-        --target 'postgresql+psycopg://user:pass@localhost:5432/depart' \\
+        --target 'postgresql+psycopg://user:pass@localhost:5432/hafen' \\
         --source-schema HR --target-schema public \\
         --create-tables
     ```
@@ -177,7 +177,7 @@ README = dedent(
 
 CONTRIBUTING = dedent(
     """\
-    # Contributing to depart
+    # Contributing to hafen
 
     Welcome! The two highest-leverage contribution areas:
 
@@ -195,8 +195,8 @@ CONTRIBUTING = dedent(
     ## Dev setup
 
     ```bash
-    git clone https://github.com/davidnhg74/depart.git
-    cd depart
+    git clone https://github.com/davidnhg74/hafen.git
+    cd hafen
     pip install -e '.[dev]'
     python scripts/generate_grammar.py   # builds the ANTLR parser
     pytest tests/ --no-cov
@@ -214,7 +214,7 @@ ARCHITECTURE = dedent(
     """\
     # Architecture
 
-    depart is split along two axes: **dialect-agnostic IR** (so we can
+    hafen is split along two axes: **dialect-agnostic IR** (so we can
     handle Oracle PL/SQL today and T-SQL tomorrow) and **introspect-plan-
     run** (so each stage is testable on its own).
 
@@ -252,8 +252,8 @@ ARCHITECTURE = dedent(
 
     AI-powered conversion (live Claude calls), the runbook PDF
     generator, the license verifier, the SaaS frontend, and the hybrid
-    control plane all live in the private `depart-cloud` repo under a
-    commercial license. See <https://depart.cloud/pricing> for the
+    control plane all live in the private `hafen-cloud` repo under a
+    commercial license. See <https://hafen.ai/pricing> for the
     tiering.
     """
 )
@@ -267,7 +267,7 @@ def main() -> int:
     p.add_argument(
         "--out",
         type=Path,
-        default=Path("/tmp/depart-public"),
+        default=Path("/tmp/hafen-public"),
         help="Destination directory (will be wiped and recreated)",
     )
     args = p.parse_args()
@@ -326,7 +326,7 @@ def main() -> int:
         dedent(
             """\
             [project]
-            name = "depart"
+            name = "hafen"
             version = "0.1.0"
             description = "Oracle to PostgreSQL migration — parser, runner, analyzer."
             readme = "README.md"
@@ -344,7 +344,7 @@ def main() -> int:
             dev = ["pytest>=9", "pytest-asyncio>=1"]
 
             [project.scripts]
-            depart = "depart.migrate.__main__:main"
+            hafen = "hafen.migrate.__main__:main"
 
             [build-system]
             requires = ["setuptools>=68"]
@@ -363,7 +363,7 @@ def main() -> int:
     print("  next steps:")
     print(f"    cd {out}")
     print("    git init && git add . && git commit -m 'initial public release'")
-    print("    git remote add origin git@github.com:davidnhg74/depart.git")
+    print("    git remote add origin git@github.com:davidnhg74/hafen.git")
     print("    git push -u origin main")
 
     return 0

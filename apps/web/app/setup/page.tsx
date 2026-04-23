@@ -11,7 +11,7 @@
  *      to /login so the freshly-minted admin can sign in.
  *
  * Operators who prefer a headless install can skip this page entirely
- * by setting DEPART_ADMIN_EMAIL + DEPART_ADMIN_PASSWORD in the API
+ * by setting HAFEN_ADMIN_EMAIL + HAFEN_ADMIN_PASSWORD in the API
  * environment — the backend creates the admin at startup and this
  * page's status check then bounces them straight to /login.
  */

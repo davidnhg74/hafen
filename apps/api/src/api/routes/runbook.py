@@ -129,7 +129,7 @@ async def generate_runbook(
                 },
             )
 
-    with tempfile.TemporaryDirectory(prefix="depart_runbook_") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="hafen_runbook_") as tmpdir:
         tmp = Path(tmpdir)
 
         schema_dir = await _unzip(schema_zip, tmp / "schema")

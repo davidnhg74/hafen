@@ -249,7 +249,7 @@ from apps.api.src.migration import DataMigrator
 from sqlalchemy import create_engine
 
 oracle = create_engine("oracle://user:password@localhost:1521/XE")
-postgres = create_engine("postgresql://user:password@localhost:5432/depart")
+postgres = create_engine("postgresql://user:password@localhost:5432/hafen")
 
 migrator = DataMigrator(oracle, postgres, num_workers=4)
 plan = migrator.plan_migration(["CUSTOMERS", "ORDERS"])

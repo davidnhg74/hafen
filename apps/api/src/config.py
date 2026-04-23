@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # in the dependency set.
     database_url: str = os.getenv(
         "DATABASE_URL",
-        "postgresql+psycopg://depart_user:depart_secure_password@localhost:5432/depart",
+        "postgresql+psycopg://hafen_user:hafen_secure_password@localhost:5432/hafen",
     )
 
     # Redis URL for the arq migration worker. localhost default lets
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     # Cloud routes (signup, billing, support, email verification) default
     # to OFF so the self-hosted product image boots without Stripe /
     # Resend / SaaS-signup exposure. The marketing/purchase site
-    # (depart.cloud) flips this to True. Tests enable it — see
+    # (hafen.ai) flips this to True. Tests enable it — see
     # tests/conftest.py.
     enable_cloud_routes: bool = os.getenv("ENABLE_CLOUD_ROUTES", "false").lower() in (
         "1",
@@ -67,7 +67,7 @@ class Settings(BaseSettings):
 
     # Email (Resend)
     resend_api_key: str = os.getenv("RESEND_API_KEY", "")
-    support_email: str = os.getenv("SUPPORT_EMAIL", "support@depart.io")
+    support_email: str = os.getenv("SUPPORT_EMAIL", "support@hafen.io")
 
 
 settings = Settings()

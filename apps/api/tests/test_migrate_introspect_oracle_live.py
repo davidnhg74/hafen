@@ -9,8 +9,8 @@ To run locally:
 
     docker compose --profile oracle up -d oracle
     # wait for healthy, then (if container is fresh) load fixture:
-    docker cp docker/oracle-init/01-hr-schema.sql depart_oracle:/tmp/
-    docker exec depart_oracle \
+    docker cp docker/oracle-init/01-hr-schema.sql hafen_oracle:/tmp/
+    docker exec hafen_oracle \
         bash -c 'sqlplus -s system/${ORACLE_PASSWORD}@FREEPDB1 @/tmp/01-hr-schema.sql'
 
     cd apps/api && pytest tests/test_migrate_introspect_oracle_live.py --no-cov

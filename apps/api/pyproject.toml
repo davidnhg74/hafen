@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "depart-api"
+name = "hafen-api"
 version = "0.1.0"
-description = "Depart — Migration Platform for Escaping Legacy Oracle Workloads"
+description = "Hafen — Migration Platform for Escaping Legacy Oracle Workloads"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.104.1",

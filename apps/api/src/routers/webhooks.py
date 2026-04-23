@@ -279,7 +279,7 @@ def test_webhook(
         {
             "migration_id": None,
             "name": ep.name,
-            "message": "This is a test delivery from Depart /settings/webhooks.",
+            "message": "This is a test delivery from Hafen /settings/webhooks.",
         },
     )
     db.refresh(ep)

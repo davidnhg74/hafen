@@ -258,7 +258,7 @@ export default function CostCalculator() {
 
             {/* PostgreSQL Costs */}
             <div className="border border-green-200 rounded-lg p-6 bg-green-50">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">PostgreSQL with Depart</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">PostgreSQL with Hafen</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-gray-700">
                   <span>Licenses:</span>
@@ -333,7 +333,7 @@ export default function CostCalculator() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-2">Ready to save {formatCurrency(analysis.annual_savings_year2_plus)}/year?</h3>
             <p className="text-gray-600 mb-4">
-              Let Depart handle the migration. Your payback period is just {analysis.payback_months.toFixed(1)} months.
+              Let Hafen handle the migration. Your payback period is just {analysis.payback_months.toFixed(1)} months.
             </p>
             <a
               href="/convert"
