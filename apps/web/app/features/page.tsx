@@ -91,47 +91,47 @@ export default function FeaturesPage() {
 
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
                 <div className="text-4xl mb-4">✅</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Testing & Validation</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Merkle Verification</h3>
                 <p className="text-gray-700">
-                  Dual-run testing compares output from Oracle and PostgreSQL side-by-side before cutover.
+                  Every copied table is hashed on both source and target and compared root-to-root. Any discrepancy surfaces per-table before cutover.
                 </p>
               </div>
 
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
                 <div className="text-4xl mb-4">📋</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Migration Planning</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Runbook Generator</h3>
                 <p className="text-gray-700">
-                  Generate detailed migration plans with data migration strategies, cutover windows, and rollback plans.
+                  Export a PDF runbook of the migration plan — schema steps, cutover checklist, and per-table load order — for stakeholder review and change control.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Performance */}
+          {/* Ongoing Operations */}
           <div className="mb-20">
-            <h2 className="text-3xl font-bold text-gray-900 mb-12">Performance & Optimization</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-12">Ongoing Operations</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-                <div className="text-4xl mb-4">📈</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Baseline Benchmarking</h3>
+                <div className="text-4xl mb-4">🕐</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Scheduled Migrations</h3>
                 <p className="text-gray-700">
-                  Capture Oracle performance metrics before migration and compare against PostgreSQL post-migration.
+                  Cron-driven recurring runs with IANA timezone support (DST-aware). Clone the template, run nightly, history stays intact.
                 </p>
               </div>
 
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-                <div className="text-4xl mb-4">⚡</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Query Optimization</h3>
+                <div className="text-4xl mb-4">🎭</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Per-Column PII Masking</h3>
                 <p className="text-gray-700">
-                  Identify and optimize slow queries, missing indexes, and suboptimal execution plans on PostgreSQL.
+                  Redact emails, SSNs, names before they land in staging. Deterministic HMAC-hash preserves foreign-key joins even when every value is masked.
                 </p>
               </div>
 
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-                <div className="text-4xl mb-4">🎯</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Tuning Recommendations</h3>
+                <div className="text-4xl mb-4">♻️</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Checkpoint & Resume</h3>
                 <p className="text-gray-700">
-                  AI-driven recommendations for configuration tuning, connection pooling, and performance settings.
+                  Every batch is checkpointed by PK. A crashed run resumes at the last successful batch instead of restarting the whole load.
                 </p>
               </div>
             </div>
@@ -150,16 +150,18 @@ export default function FeaturesPage() {
               </div>
 
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-                <div className="text-4xl mb-4">🔐</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">API Keys</h3>
-                <p className="text-gray-700">Generate and manage secure API keys for automation and third-party integrations.</p>
+                <div className="text-4xl mb-4">🪝</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Webhooks</h3>
+                <p className="text-gray-700">
+                  Fire signed HTTP requests on migration completion or failure. HMAC-SHA256 over the raw body so subscribers validate authenticity.
+                </p>
               </div>
 
               <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-                <div className="text-4xl mb-4">📧</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Notifications</h3>
+                <div className="text-4xl mb-4">🐍</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Python SDK</h3>
                 <p className="text-gray-700">
-                  Email and Slack notifications for migration milestones, approvals, and issues.
+                  <code className="rounded bg-gray-100 px-1 font-mono text-sm">pip install hafen-sdk</code> — typed client for scripted migrations and CI integration.
                 </p>
               </div>
             </div>
@@ -172,10 +174,10 @@ export default function FeaturesPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to migrate?</h2>
           <Link
-            href="/signup"
+            href="/download"
             className="inline-block px-8 py-4 bg-white text-purple-600 font-bold rounded-lg hover:bg-gray-100 transition"
           >
-            Start Your Free Trial
+            Download Community
           </Link>
         </div>
       </section>

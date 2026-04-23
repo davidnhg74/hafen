@@ -178,8 +178,8 @@ function HowItWorks() {
         <div className="mt-12 space-y-8">
           <Step
             n={1}
-            title="Install"
-            body="docker compose up. The UI comes up on localhost:3000, the API on localhost:8000. No accounts, no cloud signup, no outbound calls. Takes about 2 minutes on a fresh host."
+            title="Install inside your VPC"
+            body="docker compose up on your own host or Kubernetes cluster. The UI and API come up locally (ports 3000 and 8000). No accounts, no cloud signup, no outbound calls. Takes about 2 minutes on a fresh host."
           />
           <Step
             n={2}
