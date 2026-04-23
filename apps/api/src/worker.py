@@ -24,11 +24,13 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from arq.connections import RedisSettings
+from arq import cron
+from arq.connections import ArqRedis, RedisSettings
 
 from .config import settings
 from .db import get_session_factory
 from .services.migration_runner import run_migration
+from .services import scheduler_service
 
 
 logger = logging.getLogger(__name__)
@@ -48,6 +50,33 @@ async def run_migration_job(ctx: dict[str, Any], migration_id: str) -> None:
     db = get_session_factory()()
     try:
         run_migration(db, migration_id)
+    finally:
+        db.close()
+
+
+async def scheduler_tick(ctx: dict[str, Any]) -> None:
+    """Every-minute cron job that dispatches due migration schedules.
+
+    Requires Redis to be up — the in-process BackgroundTasks fallback
+    used by `enqueue_migration` is request-scoped and has no ticker.
+    If Redis is unreachable, schedules won't fire and the runtime
+    surfaces an error in the arq worker log (not a silent miss).
+
+    One bad schedule must not kill the tick loop, so we swallow
+    everything and log."""
+    redis_pool: ArqRedis = ctx["redis"]
+
+    async def _enqueue(migration_id: str) -> str | None:
+        job = await redis_pool.enqueue_job("run_migration_job", migration_id)
+        return job.job_id if job else None
+
+    db = get_session_factory()()
+    try:
+        fired = await scheduler_service.tick(db, _enqueue)
+        if fired:
+            logger.info("scheduler tick fired %d migration(s): %s", len(fired), fired)
+    except Exception:
+        logger.exception("scheduler tick failed")
     finally:
         db.close()
 
@@ -72,6 +101,14 @@ class WorkerSettings:
     lifecycle hooks, and retry/timeout policy all live here."""
 
     functions = [run_migration_job]
+    # One arq cron job per minute — dispatches migration schedules.
+    # run_at_startup=False because the worker may come up after the
+    # API has already enqueued work; we wait for the first aligned
+    # minute boundary to avoid firing schedules just because the
+    # worker restarted.
+    cron_jobs = [
+        cron(scheduler_tick, minute=set(range(60)), run_at_startup=False),
+    ]
     redis_settings = _redis_settings()
     # Long migrations can take hours; give them plenty of headroom.
     # If the job exceeds this the worker kills it and arq retries it.

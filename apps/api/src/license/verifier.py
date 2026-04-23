@@ -10,7 +10,7 @@ Token shape (claims we care about):
         "sub":      "operator-contact@customer.com",
         "project":  "acme-migration-2026q2",
         "tier":     "pro" | "enterprise",
-        "features": ["ai_conversion", "runbook_pdf", "ongoing_cdc", "webhooks"],
+        "features": ["ai_conversion", "runbook_pdf", "ongoing_cdc", "webhooks", "scheduled_migrations"],
         "iat":      <epoch seconds issued>,
         "exp":      <epoch seconds expiry>
     }

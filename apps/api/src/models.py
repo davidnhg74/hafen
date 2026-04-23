@@ -123,6 +123,14 @@ class MigrationRecord(Base):
     completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime, default=utc_now, nullable=False, index=True)
+    # Populated on clones produced by the scheduler so operators can
+    # list "past runs of this schedule" from the migration side.
+    spawned_from_schedule_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("migration_schedules.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
 
     @property
     def elapsed_seconds(self) -> int:
@@ -507,6 +515,45 @@ class WebhookEndpoint(Base):
     last_triggered_at = Column(DateTime, nullable=True)
     last_status = Column(Integer, nullable=True)
     last_error = Column(Text, nullable=True)
+
+
+class MigrationSchedule(Base):
+    """Cron-driven recurring execution for a MigrationRecord.
+
+    1:1 with a migration (unique FK) — the migration row is the
+    template, each fire clones it into a fresh row (new id, reset
+    run state) and enqueues through the existing arq path. If the
+    operator wants two schedules for the same data movement, they
+    clone the migration.
+
+    `next_run_at` is stored as naive UTC (matching the codebase
+    convention) but is *computed* in the schedule's timezone so
+    "run at 2am" stays 2am across DST. croniter does the math.
+    """
+
+    __tablename__ = "migration_schedules"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    migration_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("migrations.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    name = Column(String(255), nullable=False)
+    cron_expr = Column(String(120), nullable=False)
+    timezone = Column(String(64), nullable=False, default="UTC")
+    enabled = Column(Boolean, nullable=False, default=True)
+    next_run_at = Column(DateTime, nullable=False, index=True)
+    last_run_at = Column(DateTime, nullable=True)
+    last_run_migration_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("migrations.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    last_run_status = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
 
 # Pydantic response models (not ORM)

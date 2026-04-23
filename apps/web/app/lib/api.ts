@@ -553,3 +553,62 @@ export async function testWebhook(id: string): Promise<{
   const { data } = await api.post(`/api/v1/webhooks/${id}/test`);
   return data;
 }
+
+
+// ─── Schedules ───────────────────────────────────────────────────────────────
+
+export interface MigrationScheduleView {
+  id: string;
+  migration_id: string;
+  name: string;
+  cron_expr: string;
+  timezone: string;
+  enabled: boolean;
+  next_run_at: string | null;
+  last_run_at: string | null;
+  last_run_migration_id: string | null;
+  last_run_status: string | null;
+}
+
+export async function getSchedule(
+  migrationId: string,
+): Promise<MigrationScheduleView | null> {
+  try {
+    const { data } = await api.get<MigrationScheduleView>(
+      `/api/v1/migrations/${migrationId}/schedule`,
+    );
+    return data;
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
+}
+
+export async function upsertSchedule(
+  migrationId: string,
+  body: {
+    name: string;
+    cron_expr: string;
+    timezone: string;
+    enabled: boolean;
+  },
+): Promise<MigrationScheduleView> {
+  const { data } = await api.put<MigrationScheduleView>(
+    `/api/v1/migrations/${migrationId}/schedule`,
+    body,
+  );
+  return data;
+}
+
+export async function deleteSchedule(migrationId: string): Promise<void> {
+  await api.delete(`/api/v1/migrations/${migrationId}/schedule`);
+}
+
+export async function scheduleRunNow(
+  migrationId: string,
+): Promise<{ migration_id: string; job_id: string }> {
+  const { data } = await api.post(
+    `/api/v1/migrations/${migrationId}/schedule/run-now`,
+  );
+  return data;
+}

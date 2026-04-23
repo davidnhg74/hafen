@@ -33,6 +33,7 @@ import {
 import { useAuthStore } from '@/app/store/authStore';
 
 import { StatusBadge } from '../StatusBadge';
+import SchedulePanel from './SchedulePanel';
 
 
 const TERMINAL_STATES = new Set([
@@ -281,6 +282,7 @@ function DetailContent() {
         )}
 
         <ConfigPanel migration={migration} />
+        <SchedulePanel migrationId={migration.id} />
         <CheckpointsPanel checkpoints={migration.checkpoints} />
       </div>
     </main>
