@@ -28,6 +28,7 @@ export default function Navigation() {
   const selfHostedAnon = [
     { href: '/download', label: 'Download', active: pathname === '/download' },
     { href: '/assess', label: 'Demo', active: pathname === '/assess' },
+    { href: '/troubleshoot', label: 'Troubleshoot', active: pathname === '/troubleshoot' },
   ];
   const selfHostedAuthed = [
     { href: '/assess', label: 'Assess', active: pathname === '/assess' },

@@ -54,6 +54,7 @@ from .routers import (
     setup as setup_router,
     sso as sso_router,
     support,
+    troubleshoot as troubleshoot_router,
     webhooks as webhooks_router,
 )
 from .api.routes import app_impact as app_impact_route
@@ -246,6 +247,7 @@ app.include_router(cdc_router.router)
 app.include_router(app_impact_route.router)
 app.include_router(runbook_route.router)
 app.include_router(usage_route.router)
+app.include_router(troubleshoot_router.router)
 
 # Cloud-only routers — signup/login, billing, support tickets, per-user API
 # keys, and the legacy email-gated /api/v1/analyze zip-upload flow. The

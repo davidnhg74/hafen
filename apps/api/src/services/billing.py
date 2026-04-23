@@ -22,10 +22,42 @@ except ImportError:
 
 
 PLAN_LIMITS = {
-    "trial": {"databases": 1, "migrations_per_month": 3, "llm_per_month": 10, "days": 14},
-    "starter": {"databases": 5, "migrations_per_month": 25, "llm_per_month": 100},
-    "professional": {"databases": 20, "migrations_per_month": 100, "llm_per_month": 500},
-    "enterprise": {"databases": None, "migrations_per_month": None, "llm_per_month": None},
+    "trial": {
+        "databases": 1,
+        "migrations_per_month": 3,
+        "llm_per_month": 10,
+        "days": 14,
+        # Per-call upload cap for the /troubleshoot/analyze endpoint.
+        # Anonymous and trial users get the same 50MB ceiling — large
+        # enough for any realistic single error log, small enough to
+        # discourage uploading whole alert.log dumps.
+        "troubleshoot_max_upload_bytes": 50 * 1024 * 1024,
+        # Per-day call cap on the /troubleshoot endpoint. Separate
+        # rate-limit; anonymous IPs get a smaller limit enforced at the
+        # router (3/day) regardless of this value.
+        "troubleshoot_max_calls_per_day": 10,
+    },
+    "starter": {
+        "databases": 5,
+        "migrations_per_month": 25,
+        "llm_per_month": 100,
+        "troubleshoot_max_upload_bytes": 200 * 1024 * 1024,  # 200 MB
+        "troubleshoot_max_calls_per_day": None,  # unlimited on paid tiers
+    },
+    "professional": {
+        "databases": 20,
+        "migrations_per_month": 100,
+        "llm_per_month": 500,
+        "troubleshoot_max_upload_bytes": 1024 * 1024 * 1024,  # 1 GB
+        "troubleshoot_max_calls_per_day": None,
+    },
+    "enterprise": {
+        "databases": None,
+        "migrations_per_month": None,
+        "llm_per_month": None,
+        "troubleshoot_max_upload_bytes": 1024 * 1024 * 1024,  # 1 GB
+        "troubleshoot_max_calls_per_day": None,
+    },
 }
 
 

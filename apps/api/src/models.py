@@ -6,6 +6,7 @@ from sqlalchemy import (
     DateTime,
     JSON,
     ForeignKey,
+    SmallInteger,
     Text,
     Enum,
     ARRAY,
@@ -622,6 +623,65 @@ class MigrationCdcChange(Base):
     captured_at = Column(DateTime(timezone=True), nullable=False, default=utc_now)
     applied_at = Column(DateTime(timezone=True), nullable=True)
     apply_error = Column(Text, nullable=True)
+
+
+class TroubleshootAnalysis(Base):
+    """Plane 1 — per-user, per-call troubleshoot record.
+
+    Holds the input excerpt (post-truncation, post-redaction — NOT
+    the raw operator paste, which is discarded after analyze
+    returns) and the AI-generated diagnosis. user_id is nullable so
+    anonymous calls land here too (anonymous users implicitly opt
+    in to corpus contribution per the privacy notice).
+
+    Read paths in cloud mode filter by `caller.id` — same pattern
+    as `migrations`. Anonymous rows (`user_id IS NULL`) are not
+    surfaced to any tenant; they're aggregate-only.
+    """
+
+    __tablename__ = "troubleshoot_analyses"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
+    )
+    created_at = Column(
+        DateTime(timezone=True), default=utc_now, nullable=False, index=True
+    )
+    input_excerpt = Column(Text, nullable=False)
+    input_byte_count = Column(Integer, nullable=False)
+    extracted_line_count = Column(Integer, nullable=False)
+    context = Column(Text, nullable=True)
+    stage = Column(String(32), nullable=True)
+    diagnosis_json = Column(JSONB, nullable=False)
+    thumbs = Column(SmallInteger, nullable=True)
+
+
+class CorpusEntry(Base):
+    """Plane 2 — anonymized aggregated learning.
+
+    No user_id, no DSNs, no raw schema/table names. Holds the
+    canonicalized error signature, the constructs detected, and
+    outcome thumbs. Future RAG retrieval reads from here when
+    looking up similar past issues; eventual fine-tuning data is
+    sourced from here too.
+
+    Written in the same transaction as the matching
+    `TroubleshootAnalysis` (per opt-in policy: skipped for
+    Enterprise tier and for users who toggled corpus opt-out)."""
+
+    __tablename__ = "corpus_entries"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    created_at = Column(
+        DateTime(timezone=True), default=utc_now, nullable=False, index=True
+    )
+    error_signature_hash = Column(String(64), nullable=False, index=True)
+    error_codes = Column(String(255), nullable=False)
+    table_shape_signature = Column(String(255), nullable=True)
+    fix_pattern = Column(String(255), nullable=True)
+    outcome_thumbs = Column(SmallInteger, nullable=True)
+    source_feature = Column(String(64), nullable=False)
 
 
 # Pydantic response models (not ORM)

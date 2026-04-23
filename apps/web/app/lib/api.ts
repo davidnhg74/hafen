@@ -132,6 +132,55 @@ export async function fetchBranding(): Promise<Branding> {
   return data;
 }
 
+// ─── Troubleshoot ────────────────────────────────────────────────────
+
+export interface Diagnosis {
+  likely_cause: string;
+  recommended_action: string;
+  code_suggestion: string | null;
+  confidence: 'high' | 'medium' | 'needs-review';
+  escalate_if: string | null;
+  analyzed_bytes: number;
+  extracted_line_count: number;
+  used_ai: boolean;
+  analysis_id: string;
+  usage_remaining: number | null;
+}
+
+export interface AnalyzePasteRequest {
+  logs: string;
+  context?: string;
+  stage?: string;
+}
+
+export async function analyzeLogsPaste(
+  body: AnalyzePasteRequest,
+): Promise<Diagnosis> {
+  // Public endpoint — bare axios, no auth header injected by the
+  // shared `api` client (which would attach a stale token).
+  const { data } = await axios.post<Diagnosis>(
+    `${apiBaseUrl()}/api/v1/troubleshoot/analyze`,
+    body,
+  );
+  return data;
+}
+
+export async function analyzeLogsUpload(
+  files: File[],
+  context?: string,
+  stage?: string,
+): Promise<Diagnosis> {
+  const form = new FormData();
+  files.forEach((f) => form.append('files', f));
+  if (context) form.append('context', context);
+  if (stage) form.append('stage', stage);
+  const { data } = await axios.post<Diagnosis>(
+    `${apiBaseUrl()}/api/v1/troubleshoot/analyze/upload`,
+    form,
+  );
+  return data;
+}
+
 export async function fetchCurrentUser(): Promise<User | null> {
   try {
     const { data } = await api.get<User>('/api/v4/auth/me');
