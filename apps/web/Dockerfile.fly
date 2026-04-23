@@ -19,6 +19,12 @@ COPY . .
 ARG NEXT_PUBLIC_ENABLE_CLOUD_ROUTES=true
 ENV NEXT_PUBLIC_ENABLE_CLOUD_ROUTES=$NEXT_PUBLIC_ENABLE_CLOUD_ROUTES
 
+# Cloud API endpoint. The default points at the Fly app directly;
+# once DNS for api.hafen.ai is configured, the fly.toml override
+# swaps to the prettier name without a code change.
+ARG NEXT_PUBLIC_API_URL=https://hafen-api.fly.dev
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN npm run build
 
 # ─── Stage 3: runtime ─────────────────────────────────────────────

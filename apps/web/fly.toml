@@ -11,6 +11,8 @@ primary_region = "iad"
   # Baked into the client bundle at build time — NEXT_PUBLIC_* can
   # only be read by the browser if they exist at build.
   NEXT_PUBLIC_ENABLE_CLOUD_ROUTES = "true"
+  # Override the Dockerfile.fly default once api.hafen.ai DNS is up.
+  NEXT_PUBLIC_API_URL = "https://hafen-api.fly.dev"
 
 [env]
   # Runtime env — safe to change without rebuilding.
