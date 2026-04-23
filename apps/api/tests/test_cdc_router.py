@@ -240,3 +240,106 @@ def test_status_404_for_unknown_migration():
             f"/api/v1/migrations/{uuid.uuid4()}/cdc/status", headers=headers
         )
     assert r.status_code == 404
+
+
+# ─── /cdc/drain ──────────────────────────────────────────────────────
+
+
+def test_drain_requires_admin_and_license():
+    headers = _bootstrap_admin()
+    mid = _seed_migration()
+    # No license seeded → 402
+    with auth_on():
+        r = client.post(
+            f"/api/v1/migrations/{mid}/cdc/drain", headers=headers
+        )
+    assert r.status_code == 402
+
+
+def test_drain_returns_summary_shape():
+    """End-to-end through the endpoint: seed a migration with a real
+    target schema + one pending change, hit /drain, expect the
+    summary and the change to be applied on target."""
+    import psycopg
+
+    headers = _bootstrap_admin()
+    _seed_license()
+    pg_url = env_settings.database_url.replace(
+        "postgresql+psycopg://", "postgresql://"
+    )
+    target_schema = f"drain_router_{uuid.uuid4().hex[:6]}"
+    conn = psycopg.connect(pg_url)
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"CREATE SCHEMA {target_schema}")
+            cur.execute(
+                f"CREATE TABLE {target_schema}.emp (id INTEGER PRIMARY KEY, name TEXT)"
+            )
+        mid = _seed_migration(
+            target_schema=target_schema,
+            target_url=env_settings.database_url,
+        )
+        # One pending INSERT change at SCN 10
+        engine = create_engine(env_settings.database_url)
+        S = sessionmaker(bind=engine)
+        s = S()
+        s.add(
+            MigrationCdcChange(
+                migration_id=uuid.UUID(mid),
+                scn=10,
+                source_schema="HR",
+                source_table="emp",
+                op="I",
+                pk_json={"id": 1},
+                after_json={"id": 1, "name": "Alice"},
+                committed_at=datetime(2026, 4, 23, tzinfo=timezone.utc),
+            )
+        )
+        s.commit()
+        s.close()
+        engine.dispose()
+
+        with auth_on():
+            r = client.post(
+                f"/api/v1/migrations/{mid}/cdc/drain", headers=headers
+            )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["drained_count"] == 1
+        assert body["applied_count"] == 1
+        assert body["failed_count"] == 0
+        assert body["new_last_applied_scn"] == 10
+        assert isinstance(body["duration_ms"], int)
+
+        # Confirm the row actually landed on the target.
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT id, name FROM {target_schema}.emp WHERE id = 1"
+            )
+            assert cur.fetchone() == (1, "Alice")
+    finally:
+        with conn.cursor() as cur:
+            cur.execute(f"DROP SCHEMA {target_schema} CASCADE")
+        conn.close()
+
+
+def test_drain_400_when_target_url_missing():
+    headers = _bootstrap_admin()
+    _seed_license()
+    mid = _seed_migration()
+    # Clear the target_url
+    engine = create_engine(env_settings.database_url)
+    S = sessionmaker(bind=engine)
+    s = S()
+    rec = s.get(MigrationRecord, uuid.UUID(mid))
+    rec.target_url = None
+    s.commit()
+    s.close()
+    engine.dispose()
+
+    with auth_on():
+        r = client.post(
+            f"/api/v1/migrations/{mid}/cdc/drain", headers=headers
+        )
+    assert r.status_code == 400

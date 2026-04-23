@@ -26,6 +26,7 @@ from ..auth.roles import require_role
 from ..db import get_db
 from ..license.dependencies import require_feature
 from ..models import MigrationRecord
+from ..services.cdc.apply_worker import drain_migration
 from ..services.cdc.queue import queue_status
 
 
@@ -40,6 +41,14 @@ class CdcStatusView(BaseModel):
     pending_count: int
     applied_count: int
     failed_count: int
+
+
+class DrainResultView(BaseModel):
+    drained_count: int
+    applied_count: int
+    failed_count: int
+    duration_ms: int
+    new_last_applied_scn: Optional[int]
 
 
 def _parse_migration_id(raw: str) -> uuid.UUID:
@@ -69,4 +78,29 @@ def get_cdc_status(
         pending_count=counts.pending_count,
         applied_count=counts.applied_count,
         failed_count=counts.failed_count,
+    )
+
+
+@router.post("/{migration_id}/cdc/drain", response_model=DrainResultView)
+def drain_now(
+    migration_id: str,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_role("admin")),
+    _license=Depends(require_feature("ongoing_cdc")),
+) -> DrainResultView:
+    """Synchronously drain the CDC queue onto the target. Useful for
+    forcing progress without waiting for the 30s cron tick —
+    operators hit this during cutover prep, and tests use it to
+    exercise the drain path deterministically."""
+    mid = _parse_migration_id(migration_id)
+    try:
+        result = drain_migration(db, mid)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return DrainResultView(
+        drained_count=result.drained_count,
+        applied_count=result.applied_count,
+        failed_count=result.failed_count,
+        duration_ms=result.duration_ms,
+        new_last_applied_scn=result.new_last_applied_scn,
     )

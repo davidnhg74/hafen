@@ -31,6 +31,7 @@ from .config import settings
 from .db import get_session_factory
 from .services.migration_runner import run_migration
 from .services import scheduler_service
+from .services.cdc import apply_worker as cdc_apply_worker
 
 
 logger = logging.getLogger(__name__)
@@ -81,6 +82,36 @@ async def scheduler_tick(ctx: dict[str, Any]) -> None:
         db.close()
 
 
+async def cdc_apply_tick(ctx: dict[str, Any]) -> None:
+    """Every-30s cron job that drains pending CDC changes onto each
+    migration's target. Runs `drain_migration` per migration with
+    unapplied rows in the queue; one bad target mustn't halt the
+    rest of the loop."""
+    db = get_session_factory()()
+    try:
+        pending_mids = cdc_apply_worker.migrations_with_pending(db)
+        if not pending_mids:
+            return
+        summary: list[str] = []
+        for mid in pending_mids:
+            try:
+                result = cdc_apply_worker.drain_migration(db, mid)
+                if result.drained_count:
+                    summary.append(
+                        f"{mid}: {result.applied_count}/{result.drained_count} "
+                        f"applied ({result.failed_count} failed, "
+                        f"{result.duration_ms}ms)"
+                    )
+            except Exception:
+                logger.exception(
+                    "CDC drain failed for migration %s; continuing with next", mid
+                )
+        if summary:
+            logger.info("CDC apply tick: %s", "; ".join(summary))
+    finally:
+        db.close()
+
+
 def _redis_settings() -> RedisSettings:
     """Parse the REDIS_URL into arq's RedisSettings. Supports the
     standard redis://host:port/db syntax; more exotic schemes can be
@@ -108,6 +139,11 @@ class WorkerSettings:
     # worker restarted.
     cron_jobs = [
         cron(scheduler_tick, minute=set(range(60)), run_at_startup=False),
+        # CDC apply tick — drain the change queue onto each migration's
+        # target every 30s. Faster cadence than the scheduler because
+        # CDC lag is what operators feel during cutover; 30s keeps
+        # replication lag visibly small without hammering Postgres.
+        cron(cdc_apply_tick, second={0, 30}, run_at_startup=False),
     ]
     redis_settings = _redis_settings()
     # Long migrations can take hours; give them plenty of headroom.
