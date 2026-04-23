@@ -103,6 +103,60 @@ CORPUS = [
         """,
         id="package-with-ref-cursor-type",
     ),
+    # Regression cases for advanced PL/SQL constructs. These all parse
+    # today; the point of including them is to catch a future grammar
+    # regression (e.g. if someone simplifies the .g4 and accidentally
+    # drops support for PIPELINED or WITHIN GROUP).
+    pytest.param(
+        """
+        CREATE OR REPLACE FUNCTION pipe_fn RETURN num_tab PIPELINED IS
+        BEGIN
+            FOR i IN 1..10 LOOP PIPE ROW(i); END LOOP;
+            RETURN;
+        END;
+        """,
+        id="pipelined-function",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE PROCEDURE mrg IS
+        BEGIN
+            MERGE INTO t USING s ON (t.id = s.id)
+            WHEN MATCHED THEN UPDATE SET t.x = s.x
+                DELETE WHERE t.x < 0
+            WHEN NOT MATCHED THEN INSERT (id, x) VALUES (s.id, s.x);
+        END;
+        """,
+        id="merge-with-delete-where",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE PROCEDURE agg IS
+            names VARCHAR2(4000);
+        BEGIN
+            SELECT LISTAGG(name, ', ') WITHIN GROUP (ORDER BY name)
+            INTO names FROM emp;
+        END;
+        """,
+        id="listagg-within-group",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE VIEW ranked_emps AS
+        SELECT emp_id,
+               ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rn
+        FROM emp;
+        """,
+        id="analytic-function-over-partition",
+    ),
+    pytest.param(
+        """
+        CREATE OR REPLACE VIEW pv AS
+        SELECT * FROM (SELECT dept_id, salary FROM emp)
+        PIVOT (SUM(salary) FOR dept_id IN (10, 20, 30));
+        """,
+        id="select-with-pivot",
+    ),
 ]
 
 
