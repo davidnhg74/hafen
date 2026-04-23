@@ -25,7 +25,7 @@ def _pdf_text(pdf_bytes: bytes) -> str:
 
 
 FIXTURES = Path(__file__).parent / "fixtures" / "app_impact"
-_DEV_KEY = Path.home() / ".depart-keys" / "license_private_dev.pem"
+_DEV_KEY = Path.home() / ".hafen-keys" / "license_private_dev.pem"
 
 
 @pytest.fixture

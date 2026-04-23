@@ -31,7 +31,7 @@ from src.services.settings_service import set_license_jwt
 
 
 client = TestClient(app)
-_DEV_KEY = Path.home() / ".depart-keys" / "license_private_dev.pem"
+_DEV_KEY = Path.home() / ".hafen-keys" / "license_private_dev.pem"
 
 
 @contextmanager

@@ -21,12 +21,12 @@ from pathlib import Path
 # the PRODUCTION public key — its matching private key lives off the
 # laptop (see ~/.hafen-prod-keys/ and the launch runbook). Tests
 # continue to mint tokens with the DEV private key at
-# ~/.depart-keys/license_private_dev.pem; we patch the verifier at
+# ~/.hafen-keys/license_private_dev.pem; we patch the verifier at
 # session start to accept dev-signed tokens. Production installs are
 # unaffected (they always use the bundled prod key).
 @pytest.fixture(autouse=True, scope="session")
 def _use_dev_license_key_in_tests():
-    dev_pub_path = Path.home() / ".depart-keys" / "license_public_dev.pem"
+    dev_pub_path = Path.home() / ".hafen-keys" / "license_public_dev.pem"
     if not dev_pub_path.exists():
         # No dev keys on this machine — license-gated tests will be
         # skipped via their own mint helpers; everything else runs.

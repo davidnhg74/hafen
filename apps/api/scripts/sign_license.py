@@ -1,6 +1,6 @@
 """Sign a hafen license JWT (dev helper).
 
-Reads the private key from ~/.depart-keys/license_private_dev.pem by
+Reads the private key from ~/.hafen-keys/license_private_dev.pem by
 default and emits an RS256 JWT with the claims the verifier expects.
 Production licenses are signed by a separate, out-of-band tool against
 the production keypair — this script exists only for local testing
@@ -29,7 +29,7 @@ from pathlib import Path
 from jose import jwt
 
 
-DEFAULT_KEY_PATH = Path.home() / ".depart-keys" / "license_private_dev.pem"
+DEFAULT_KEY_PATH = Path.home() / ".hafen-keys" / "license_private_dev.pem"
 
 
 def main() -> int:
@@ -57,7 +57,7 @@ def main() -> int:
         print(
             f"private key not found at {args.key}. generate one with:\n"
             "  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 "
-            "-out ~/.depart-keys/license_private_dev.pem",
+            "-out ~/.hafen-keys/license_private_dev.pem",
             file=sys.stderr,
         )
         return 1

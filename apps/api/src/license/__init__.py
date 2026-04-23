@@ -6,7 +6,7 @@ public half of hafen's license-signing keypair (at
 the operator uploads against it.
 
 The private half lives outside this repo — dev signing keys at
-`~/.depart-keys/license_private_dev.pem`, production keys managed
+`~/.hafen-keys/license_private_dev.pem`, production keys managed
 out-of-band. Customers never see either.
 
 Public surface:

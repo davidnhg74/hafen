@@ -62,7 +62,7 @@ apps/api/src/source/oracle/_generated/
 .cache/hafen-grammar/
 
 # License signing private keys — must never be committed.
-# Dev keys live at ~/.depart-keys/. Production keys are managed
+# Dev keys live at ~/.hafen-keys/. Production keys are managed
 # out-of-band. The public key at apps/api/src/license/public_key.pem
 # is the verification key and ships with the product image.
 *_private*.pem

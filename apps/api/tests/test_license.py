@@ -1,7 +1,7 @@
 """Tests for the offline license verifier.
 
 Covers the three states the rest of the app cares about: missing,
-invalid, valid. Uses the dev signing key at ~/.depart-keys/ to mint
+invalid, valid. Uses the dev signing key at ~/.hafen-keys/ to mint
 test tokens — same key the test_settings_and_byok.py fixture uses.
 """
 
@@ -17,7 +17,7 @@ from src.license import Tier, verify
 from src.license.verifier import _load_public_key
 
 
-_DEV_PRIVATE_KEY_PATH = Path.home() / ".depart-keys" / "license_private_dev.pem"
+_DEV_PRIVATE_KEY_PATH = Path.home() / ".hafen-keys" / "license_private_dev.pem"
 
 
 def _sign(claims: dict) -> str:
